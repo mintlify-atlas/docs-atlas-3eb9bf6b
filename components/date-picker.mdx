@@ -1,0 +1,136 @@
+---
+title: "Date picker"
+description: "A flatpickr-powered date picker component with support for single date, multiple date, range, and time selection modes."
+---
+
+The `DatePicker` component wraps [flatpickr](https://flatpickr.js.org/) in a React component with a styled input and calendar icon. It initialises a flatpickr instance on mount and destroys it on unmount.
+
+<Note>
+  flatpickr is already included as a dependency in TailAdmin. You do not need to install it separately.
+</Note>
+
+```tsx
+import DatePicker from "@/components/form/date-picker";
+```
+
+## Props
+
+<ParamField path="id" type="string" required>
+  A unique ID applied to the underlying `<input>` element. flatpickr targets the element by this ID, so it must be unique within the page.
+</ParamField>
+
+<ParamField path="mode" type='"single" | "multiple" | "range" | "time"' default='"single"'>
+  Selection mode passed directly to flatpickr.
+
+  - **single** — pick one date
+  - **multiple** — pick several independent dates
+  - **range** — pick a start and end date
+  - **time** — pick a time only
+</ParamField>
+
+<ParamField path="defaultDate" type="DateOption">
+  Initial date pre-selected when the picker opens. Accepts any value that flatpickr's `DateOption` type supports: a `Date` object, a Unix timestamp, or a date string such as `"2025-06-15"`.
+</ParamField>
+
+<ParamField path="onChange" type="Hook | Hook[]">
+  flatpickr change hook called whenever the selected date(s) change. The callback signature is `(selectedDates: Date[], dateStr: string, instance: flatpickr.Instance) => void`.
+</ParamField>
+
+<ParamField path="label" type="string">
+  Optional label text rendered above the input using the `Label` component.
+</ParamField>
+
+<ParamField path="placeholder" type="string">
+  Placeholder text shown inside the input when no date is selected.
+</ParamField>
+
+## Usage examples
+
+<CodeGroup>
+```tsx Single date
+import DatePicker from "@/components/form/date-picker";
+
+<DatePicker
+  id="start-date"
+  label="Start date"
+  placeholder="YYYY-MM-DD"
+/>
+```
+
+```tsx Date range
+import DatePicker from "@/components/form/date-picker";
+
+<DatePicker
+  id="date-range"
+  mode="range"
+  label="Select a date range"
+  placeholder="YYYY-MM-DD to YYYY-MM-DD"
+/>
+```
+
+```tsx With default date
+import DatePicker from "@/components/form/date-picker";
+
+<DatePicker
+  id="due-date"
+  label="Due date"
+  defaultDate="2025-12-31"
+  placeholder="YYYY-MM-DD"
+/>
+```
+
+```tsx With onChange handler
+import DatePicker from "@/components/form/date-picker";
+
+<DatePicker
+  id="booking-date"
+  label="Booking date"
+  placeholder="Select a date"
+  onChange={(selectedDates, dateStr) => {
+    console.log("Selected:", dateStr);
+  }}
+/>
+```
+
+```tsx Time picker
+import DatePicker from "@/components/form/date-picker";
+
+<DatePicker
+  id="meeting-time"
+  mode="time"
+  label="Meeting time"
+  placeholder="HH:MM"
+/>
+```
+</CodeGroup>
+
+## Date format
+
+The component uses flatpickr's `dateFormat: "Y-m-d"` by default, producing strings like `2025-06-15`. If you need a different format, you can extend the component or configure flatpickr directly using the `onChange` callback alongside the raw `selectedDates` array.
+
+## How it works
+
+The component calls `flatpickr(`#${id}`, { ... })` inside a `useEffect` that runs when `id`, `mode`, `onChange`, or `defaultDate` change. The `static: true` and `monthSelectorType: "static"` options are set to avoid z-index conflicts inside card layouts. The cleanup function calls `flatPickr.destroy()` to prevent memory leaks.
+
+```tsx
+useEffect(() => {
+  const flatPickr = flatpickr(`#${id}`, {
+    mode: mode || "single",
+    static: true,
+    monthSelectorType: "static",
+    dateFormat: "Y-m-d",
+    defaultDate,
+    onChange,
+  });
+
+  return () => {
+    if (!Array.isArray(flatPickr)) {
+      flatPickr.destroy();
+    }
+  };
+}, [mode, onChange, id, defaultDate]);
+```
+
+<Tip>
+  When using the `range` mode, the `onChange` callback receives two `Date` objects in the `selectedDates` array — `selectedDates[0]` for the start date and `selectedDates[1]` for the end date.
+</Tip>

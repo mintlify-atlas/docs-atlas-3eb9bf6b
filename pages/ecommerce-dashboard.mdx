@@ -1,0 +1,198 @@
+---
+title: "Ecommerce dashboard"
+description: "The main dashboard page, served at the root route, composing six data-rich widgets in a responsive 12-column grid."
+---
+
+The ecommerce dashboard is the homepage of your TailAdmin application, served at **`/`**. It is built from six purpose-built components arranged in a 12-column CSS grid and wrapped by the admin layout that provides the sidebar, header, and backdrop.
+
+## Page composition
+
+<CardGroup cols={2}>
+  <Card title="EcommerceMetrics" icon="chart-bar">
+    Two KPI cards showing total **Customers** (3,782, +11.01%) and total **Orders** (5,359, −9.05%) with colour-coded trend badges.
+  </Card>
+  <Card title="MonthlySalesChart" icon="chart-column">
+    A bar chart (ApexCharts) plotting monthly sales figures for all twelve months of the year with a dropdown context menu.
+  </Card>
+  <Card title="MonthlyTarget" icon="circle-dashed">
+    A radial/gauge chart showing progress toward the monthly revenue target (75.55%), plus Target, Revenue, and Today summary figures below.
+  </Card>
+  <Card title="StatisticsChart" icon="chart-line">
+    A dual-series area chart comparing **Sales** and **Revenue** trends across the year, with a tab switcher and a flatpickr date-range picker.
+  </Card>
+  <Card title="DemographicCard" icon="globe">
+    A world map (**CountryMap**) with a per-country customer breakdown list. Each country row shows a flag, customer count, and a percentage progress bar.
+  </Card>
+  <Card title="RecentOrders" icon="table">
+    A scrollable table of the five most recent orders showing product image, name, variant count, category, price, and a status badge (Delivered / Pending / Canceled).
+  </Card>
+</CardGroup>
+
+## Grid layout
+
+The page uses a **12-column grid** with responsive column spans. At `xl` breakpoints the layout splits into two side-by-side columns; below that every widget stretches to full width.
+
+```tsx
+// src/app/(admin)/page.tsx
+export default function Ecommerce() {
+  return (
+    <div className="grid grid-cols-12 gap-4 md:gap-6">
+      {/* Left column — 7 cols on xl */}
+      <div className="col-span-12 space-y-6 xl:col-span-7">
+        <EcommerceMetrics />
+        <MonthlySalesChart />
+      </div>
+
+      {/* Right column — 5 cols on xl */}
+      <div className="col-span-12 xl:col-span-5">
+        <MonthlyTarget />
+      </div>
+
+      {/* Full-width row */}
+      <div className="col-span-12">
+        <StatisticsChart />
+      </div>
+
+      {/* Bottom-left — 5 cols on xl */}
+      <div className="col-span-12 xl:col-span-5">
+        <DemographicCard />
+      </div>
+
+      {/* Bottom-right — 7 cols on xl */}
+      <div className="col-span-12 xl:col-span-7">
+        <RecentOrders />
+      </div>
+    </div>
+  );
+}
+```
+
+## Admin layout
+
+All pages under `src/app/(admin)/` inherit the `AdminLayout`. It renders **`AppSidebar`**, **`Backdrop`**, and **`AppHeader`**, and shifts the main content area left or right depending on sidebar state.
+
+```tsx
+// src/app/(admin)/layout.tsx (simplified)
+const mainContentMargin = isMobileOpen
+  ? "ml-0"
+  : isExpanded || isHovered
+  ? "lg:ml-[290px]"
+  : "lg:ml-[90px]";
+```
+
+Page content is constrained to `max-w-(--breakpoint-2xl)` and padded with `p-4 md:p-6`.
+
+## Component details
+
+### EcommerceMetrics
+
+`EcommerceMetrics` renders a two-column grid of metric cards. Each card contains an icon, a label, a figure, and a `Badge` indicating the percentage change.
+
+```tsx
+// src/components/ecommerce/EcommerceMetrics.tsx
+<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
+  <div className="rounded-2xl border border-gray-200 bg-white p-5 ...">
+    <GroupIcon className="text-gray-800 size-6 dark:text-white/90" />
+    <span>Customers</span>
+    <h4>3,782</h4>
+    <Badge color="success"><ArrowUpIcon />11.01%</Badge>
+  </div>
+  {/* Orders card follows the same structure */}
+</div>
+```
+
+To add a third metric card, duplicate a card `div` inside the grid and adjust the `sm:grid-cols-2` class to `sm:grid-cols-3`.
+
+### MonthlySalesChart
+
+A client component that dynamically imports `react-apexcharts` (SSR disabled) and renders a `bar` chart. The `series` array holds one dataset named `Sales` with twelve monthly values.
+
+```tsx
+// src/components/ecommerce/MonthlySalesChart.tsx
+const series = [
+  {
+    name: "Sales",
+    data: [168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112],
+  },
+];
+```
+
+Replace the `data` array with values fetched from your API to connect real data.
+
+### MonthlyTarget
+
+A `radialBar` ApexChart that reads progress from the `series` array (`[75.55]` by default). The bottom section displays **Target**, **Revenue**, and **Today** summary figures.
+
+```tsx
+// src/components/ecommerce/MonthlyTarget.tsx
+const series = [75.55]; // percentage of target achieved
+```
+
+Update `series` and the hardcoded `$20K` figures with values from your data source.
+
+### StatisticsChart
+
+An `area` chart with two series — **Sales** and **Revenue** — overlaid on the same axes. It also initialises a `flatpickr` date-range picker that you can wire to a data-fetching function.
+
+```tsx
+// src/components/ecommerce/StatisticsChart.tsx
+const series = [
+  { name: "Sales",   data: [180, 190, 170, 160, 175, 165, 170, 205, 230, 210, 240, 235] },
+  { name: "Revenue", data: [40,  30,  50,  40,  55,  40,  70,  100, 110, 120, 150, 140] },
+];
+```
+
+### DemographicCard
+
+Contains **`CountryMap`** (an SVG world map) and a list of countries with customer counts and progress bars. To add more countries, append rows to the list inside the `space-y-5` div following the same markup pattern as the existing USA and France rows.
+
+### RecentOrders
+
+A server-compatible table component that maps over a `tableData` array typed as `Product[]`. Each row shows a product image, name, variant count, category, price, and a status `Badge`.
+
+```tsx
+// src/components/ecommerce/RecentOrders.tsx
+interface Product {
+  id: number;
+  name: string;
+  variants: string;
+  category: string;
+  price: string;
+  image: string;
+  status: "Delivered" | "Pending" | "Canceled";
+}
+```
+
+Replace the static `tableData` array with data fetched from your orders API.
+
+## Customising the dashboard
+
+<Steps>
+  <Step title="Replace static data with API calls">
+    Each chart component contains a hardcoded `series` or `tableData` array. Fetch real data in a server component (or via `useEffect` / SWR in a client component) and pass it as props.
+
+    ```tsx
+    // Example: fetching orders for RecentOrders
+    const tableData = await fetch("/api/orders/recent").then((r) => r.json());
+    ```
+  </Step>
+  <Step title="Add or remove widgets">
+    Open `src/app/(admin)/page.tsx` and add or delete the corresponding `<div>` blocks inside the grid. Adjust the `col-span-*` classes to control width.
+
+    ```tsx
+    <div className="col-span-12 xl:col-span-6">
+      <YourNewWidget />
+    </div>
+    ```
+  </Step>
+  <Step title="Rearrange the layout">
+    Move `<div>` blocks within the grid to change their visual order. Because the grid is 12 columns, any combination of spans that sums to 12 per row is valid.
+  </Step>
+  <Step title="Swap chart libraries">
+    Each chart component uses `react-apexcharts` loaded via `next/dynamic` with `{ ssr: false }`. You can replace the `ReactApexChart` call with any chart library that supports client-side rendering.
+  </Step>
+</Steps>
+
+<Tip>
+  Keep heavy chart components as client components (`"use client"`) and load them with `next/dynamic` to avoid SSR issues with browser-only charting libraries.
+</Tip>

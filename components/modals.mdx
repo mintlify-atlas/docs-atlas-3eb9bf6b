@@ -1,0 +1,159 @@
+---
+title: "Modal"
+description: "A composable modal dialog component paired with a useModal hook for managing open/close state."
+---
+
+The modal system in TailAdmin consists of two parts:
+
+- **`Modal`** — the presentational component that renders the overlay and dialog.
+- **`useModal`** — a lightweight hook that manages the open/close state.
+
+## `useModal` hook
+
+```tsx
+import { useModal } from "@/hooks/useModal";
+```
+
+### Parameters
+
+<ParamField path="initialState" type="boolean" default="false">
+  The initial open state of the modal.
+</ParamField>
+
+### Return values
+
+<ParamField path="isOpen" type="boolean">
+  The current open state. Pass this directly to the `Modal` component's `isOpen` prop.
+</ParamField>
+
+<ParamField path="openModal" type="() => void">
+  Sets `isOpen` to `true`. Memoized with `useCallback`.
+</ParamField>
+
+<ParamField path="closeModal" type="() => void">
+  Sets `isOpen` to `false`. Memoized with `useCallback`.
+</ParamField>
+
+<ParamField path="toggleModal" type="() => void">
+  Flips `isOpen` between `true` and `false`. Memoized with `useCallback`.
+</ParamField>
+
+## `Modal` component
+
+```tsx
+import { Modal } from "@/components/ui/modal";
+```
+
+### Props
+
+<ParamField path="isOpen" type="boolean" required>
+  Controls whether the modal is rendered. When `false`, the component returns `null`.
+</ParamField>
+
+<ParamField path="onClose" type="() => void" required>
+  Called when the user clicks the backdrop, presses **Escape**, or clicks the close button.
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  The content rendered inside the modal dialog.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes applied to the dialog container.
+</ParamField>
+
+<ParamField path="showCloseButton" type="boolean" default="true">
+  When `true`, a circular close (×) button is rendered in the top-right corner of the dialog.
+</ParamField>
+
+<ParamField path="isFullscreen" type="boolean" default="false">
+  When `true`, the dialog occupies the full viewport (`w-full h-full`) and the blurred backdrop is not rendered.
+</ParamField>
+
+## Behavior
+
+- The backdrop is a blurred, semi-transparent overlay (`bg-gray-400/50 backdrop-blur-[32px]`). Clicking it calls `onClose`.
+- Pressing **Escape** calls `onClose` via a `keydown` listener added while the modal is open.
+- While the modal is open, `document.body.style.overflow` is set to `"hidden"` to prevent background scrolling.
+- Clicks inside the dialog are stopped from propagating to the backdrop via `e.stopPropagation()`.
+- The modal is rendered at `z-99999` to sit above all other content.
+
+## Complete open/close example
+
+```tsx
+"use client";
+import { Modal } from "@/components/ui/modal";
+import { useModal } from "@/hooks/useModal";
+import Button from "@/components/ui/button/Button";
+
+export default function ExampleModal() {
+  const { isOpen, openModal, closeModal } = useModal();
+
+  return (
+    <>
+      <Button variant="primary" onClick={openModal}>
+        Open Modal
+      </Button>
+
+      <Modal
+        isOpen={isOpen}
+        onClose={closeModal}
+        className="max-w-[584px] p-5 lg:p-10"
+      >
+        <h4 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
+          Modal title
+        </h4>
+        <p className="mt-2 text-sm text-gray-500">
+          Modal body text goes here.
+        </p>
+        <div className="mt-6 flex justify-end gap-3">
+          <Button variant="outline" onClick={closeModal}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={closeModal}>
+            Confirm
+          </Button>
+        </div>
+      </Modal>
+    </>
+  );
+}
+```
+
+## Fullscreen modal
+
+```tsx
+"use client";
+import { Modal } from "@/components/ui/modal";
+import { useModal } from "@/hooks/useModal";
+import Button from "@/components/ui/button/Button";
+
+export default function FullscreenExample() {
+  const { isOpen, openModal, closeModal } = useModal();
+
+  return (
+    <>
+      <Button variant="primary" onClick={openModal}>
+        Open Fullscreen
+      </Button>
+
+      <Modal
+        isOpen={isOpen}
+        onClose={closeModal}
+        isFullscreen
+        showCloseButton={false}
+      >
+        <div className="flex h-screen items-center justify-center">
+          <Button variant="outline" onClick={closeModal}>
+            Close
+          </Button>
+        </div>
+      </Modal>
+    </>
+  );
+}
+```
+
+<Note>
+  `Modal` is a Client Component (`"use client"`). Place it inside a Client Component or import it dynamically if you need to use it in a Server Component tree.
+</Note>

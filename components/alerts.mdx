@@ -1,0 +1,132 @@
+---
+title: "Alert"
+description: "A contextual alert component with four severity variants, an optional inline link, and full dark mode support."
+---
+
+The `Alert` component displays a short, prominent message with an icon that communicates the severity of the feedback.
+
+```tsx
+import Alert from "@/components/ui/alert/Alert";
+```
+
+## Props
+
+<ParamField path="variant" type="success | error | warning | info" required>
+  Determines the icon, border color, and background color of the alert.
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  Bold heading text rendered above the message.
+</ParamField>
+
+<ParamField path="message" type="string" required>
+  Descriptive body text rendered below the title.
+</ParamField>
+
+<ParamField path="showLink" type="boolean" default="false">
+  When `true`, renders an underlined link below the message.
+</ParamField>
+
+<ParamField path="linkHref" type="string" default="#">
+  The `href` for the optional link. Only used when `showLink` is `true`.
+</ParamField>
+
+<ParamField path="linkText" type="string" default="Learn more">
+  The display text for the optional link.
+</ParamField>
+
+## Variants
+
+<Tabs>
+  <Tab title="Success">
+    ```tsx
+    <Alert
+      variant="success"
+      title="Success Message"
+      message="Be cautious when performing this action."
+    />
+
+    {/* With link */}
+    <Alert
+      variant="success"
+      title="Success Message"
+      message="Be cautious when performing this action."
+      showLink={true}
+      linkHref="/"
+      linkText="Learn more"
+    />
+    ```
+  </Tab>
+  <Tab title="Warning">
+    ```tsx
+    <Alert
+      variant="warning"
+      title="Warning Message"
+      message="Be cautious when performing this action."
+    />
+
+    {/* With link */}
+    <Alert
+      variant="warning"
+      title="Warning Message"
+      message="Be cautious when performing this action."
+      showLink={true}
+      linkHref="/"
+      linkText="Learn more"
+    />
+    ```
+  </Tab>
+  <Tab title="Error">
+    ```tsx
+    <Alert
+      variant="error"
+      title="Error Message"
+      message="Be cautious when performing this action."
+    />
+
+    {/* With link */}
+    <Alert
+      variant="error"
+      title="Error Message"
+      message="Be cautious when performing this action."
+      showLink={true}
+      linkHref="/"
+      linkText="Learn more"
+    />
+    ```
+  </Tab>
+  <Tab title="Info">
+    ```tsx
+    <Alert
+      variant="info"
+      title="Info Message"
+      message="Be cautious when performing this action."
+    />
+
+    {/* With link */}
+    <Alert
+      variant="info"
+      title="Info Message"
+      message="Be cautious when performing this action."
+      showLink={true}
+      linkHref="/"
+      linkText="Learn more"
+    />
+    ```
+  </Tab>
+</Tabs>
+
+## Variant color mapping
+
+| Variant | Border | Background | Icon color |
+|---|---|---|---|
+| `success` | `border-success-500` | `bg-success-50` | `text-success-500` |
+| `error` | `border-error-500` | `bg-error-50` | `text-error-500` |
+| `warning` | `border-warning-500` | `bg-warning-50` | `text-warning-500` |
+| `info` | `border-blue-light-500` | `bg-blue-light-50` | `text-blue-light-500` |
+
+Dark mode variants use the corresponding `dark:border-*-500/30` and `dark:bg-*-500/15` utility classes automatically.
+
+<Note>
+  The `Alert` component renders a `<Link>` from `next/link` for the optional link, so standard Next.js client-side navigation applies.
+</Note>

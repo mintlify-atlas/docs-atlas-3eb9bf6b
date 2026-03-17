@@ -1,0 +1,108 @@
+---
+title: "Blank page"
+description: "A minimal starter page at /blank you can use as a foundation for any new admin page."
+---
+
+The blank page lives at **`/blank`** inside the admin route group. It is a lightweight template you copy or extend when adding a new section to your dashboard. It renders a **`PageBreadcrumb`** and a single white card panel with centred placeholder text.
+
+## Route and layout
+
+| Detail | Value |
+|---|---|
+| Route | `/blank` |
+| Page file | `src/app/(admin)/(others-pages)/blank/page.tsx` |
+| Layout | Admin layout (sidebar + header) |
+
+## Page source
+
+```tsx
+// src/app/(admin)/(others-pages)/blank/page.tsx
+import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+
+export default function BlankPage() {
+  return (
+    <div>
+      <PageBreadcrumb pageTitle="Blank Page" />
+      <div className="min-h-screen rounded-2xl border border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10 xl:py-12">
+        <div className="mx-auto w-full max-w-[630px] text-center">
+          <h3 className="mb-4 font-semibold text-gray-800 text-theme-xl dark:text-white/90 sm:text-2xl">
+            Card Title Here
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 sm:text-base">
+            Start putting content on grids or panels, you can also use different
+            combinations of grids. Please check out the dashboard and other pages.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+## Layout structure
+
+The card panel uses the following Tailwind classes that match the style of other admin pages:
+
+| Class | Purpose |
+|---|---|
+| `min-h-screen` | Expands the card to fill the viewport height |
+| `rounded-2xl` | Consistent rounded corners used across all cards |
+| `border border-gray-200` | Standard card border (dark: `border-gray-800`) |
+| `bg-white dark:bg-white/[0.03]` | Card background with dark mode transparency |
+| `px-5 py-7 xl:px-10 xl:py-12` | Responsive padding |
+| `max-w-[630px] text-center` | Centres content at a readable width |
+
+## Using the blank page as a starting point
+
+<Steps>
+  <Step title="Duplicate the file">
+    Copy the blank page to a new route directory under `src/app/(admin)/(others-pages)/`:
+
+    ```bash
+    cp -r src/app/(admin)/(others-pages)/blank \
+           src/app/(admin)/(others-pages)/your-page
+    ```
+  </Step>
+  <Step title="Update the metadata and page title">
+    Open the new `page.tsx` and replace the `metadata` values and `pageTitle` prop:
+
+    ```tsx
+    export const metadata: Metadata = {
+      title: "Your Page | TailAdmin",
+      description: "Description of your new page.",
+    };
+
+    export default function YourPage() {
+      return (
+        <div>
+          <PageBreadcrumb pageTitle="Your Page" />
+          {/* your content */}
+        </div>
+      );
+    }
+    ```
+  </Step>
+  <Step title="Replace the placeholder content">
+    Remove the centred placeholder `div` and place your components inside the card panel. You can use the 12-column grid pattern from the ecommerce dashboard:
+
+    ```tsx
+    <div className="min-h-screen rounded-2xl border border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10 xl:py-12">
+      <div className="grid grid-cols-12 gap-4 md:gap-6">
+        <div className="col-span-12 xl:col-span-6">
+          <YourFirstWidget />
+        </div>
+        <div className="col-span-12 xl:col-span-6">
+          <YourSecondWidget />
+        </div>
+      </div>
+    </div>
+    ```
+  </Step>
+  <Step title="Add the route to the sidebar navigation">
+    Open `src/layout/AppSidebar.tsx` (or your nav configuration file) and add a link to your new route so it appears in the sidebar.
+  </Step>
+</Steps>
+
+<Tip>
+  All admin pages share the same outer card style — `rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]`. Keeping this class combination on your top-level container ensures visual consistency with the rest of the dashboard.
+</Tip>

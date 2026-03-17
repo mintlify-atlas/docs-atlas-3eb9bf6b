@@ -1,0 +1,135 @@
+---
+title: "Profile page"
+description: "The user profile page at /profile, showing personal information, address, and social links with inline edit modals."
+---
+
+The profile page lives at **`/profile`** inside the admin route group. It is a server component that composes three card components — **`UserMetaCard`**, **`UserInfoCard`**, and **`UserAddressCard`** — inside a shared container. All three cards include an **Edit** button that opens a modal form.
+
+## Route and layout
+
+| Detail | Value |
+|---|---|
+| Route | `/profile` |
+| Page file | `src/app/(admin)/(others-pages)/profile/page.tsx` |
+| Layout | Admin layout (sidebar + header) |
+
+## Page structure
+
+```tsx
+// src/app/(admin)/(others-pages)/profile/page.tsx
+import UserAddressCard from "@/components/user-profile/UserAddressCard";
+import UserInfoCard   from "@/components/user-profile/UserInfoCard";
+import UserMetaCard   from "@/components/user-profile/UserMetaCard";
+
+export default function Profile() {
+  return (
+    <div>
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+        <h3 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7">
+          Profile
+        </h3>
+        <div className="space-y-6">
+          <UserMetaCard />
+          <UserInfoCard />
+          <UserAddressCard />
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+## Components
+
+<CardGroup cols={1}>
+  <Card title="UserMetaCard">
+    Displays the user's **avatar**, **display name** (Musharof Chowdhury), **role** (Team Manager), **location** (Arizona, United States), and **social profile links** (Facebook, X, LinkedIn, Instagram). The **Edit** button opens a modal with fields for social links and personal information including First Name, Last Name, Email, Phone, and Bio.
+  </Card>
+  <Card title="UserInfoCard">
+    Displays **personal information** in a two-column grid: First Name, Last Name, Email address, Phone, and Bio. The **Edit** button opens a modal pre-populated with the same fields.
+  </Card>
+  <Card title="UserAddressCard">
+    Displays **address details**: Country, City/State, Postal Code, and TAX ID. The **Edit** button opens a modal with matching editable fields.
+  </Card>
+</CardGroup>
+
+All three components are client components (`"use client"`) that use the `useModal` hook to control modal open/close state.
+
+## Edit modal pattern
+
+Each card follows the same pattern:
+
+```tsx
+// Example from UserInfoCard.tsx
+const { isOpen, openModal, closeModal } = useModal();
+
+const handleSave = () => {
+  // place your save/API call here
+  console.log("Saving changes...");
+  closeModal();
+};
+
+// In JSX
+<button onClick={openModal}>Edit</button>
+
+<Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
+  <form className="flex flex-col">
+    {/* form fields */}
+    <Button size="sm" variant="outline" onClick={closeModal}>Close</Button>
+    <Button size="sm" onClick={handleSave}>Save Changes</Button>
+  </form>
+</Modal>
+```
+
+## Populating real user data
+
+<Steps>
+  <Step title="Fetch the current user on the server">
+    In `profile/page.tsx`, fetch your authenticated user before rendering the cards:
+
+    ```tsx
+    import { getServerSession } from "next-auth";
+    import { authOptions } from "@/lib/auth";
+
+    export default async function Profile() {
+      const session = await getServerSession(authOptions);
+      const user = session?.user;
+      // pass user to child components as props
+    }
+    ```
+  </Step>
+  <Step title="Accept props in each card component">
+    Update **`UserMetaCard`**, **`UserInfoCard`**, and **`UserAddressCard`** to accept a `user` prop:
+
+    ```tsx
+    interface UserMetaCardProps {
+      name: string;
+      role: string;
+      location: string;
+      avatarUrl: string;
+    }
+
+    export default function UserMetaCard({ name, role, location, avatarUrl }: UserMetaCardProps) {
+      // replace hardcoded values
+    }
+    ```
+  </Step>
+  <Step title="Implement the save handler">
+    Replace the `console.log` in `handleSave` with a `fetch` or server action call:
+
+    ```tsx
+    const handleSave = async () => {
+      await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ firstName, lastName, email, phone, bio }),
+      });
+      closeModal();
+    };
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+  You can replace the static avatar at `/images/user/owner.jpg` by passing a dynamic `src` to the `next/image` `Image` component in **`UserMetaCard`**.
+</Tip>

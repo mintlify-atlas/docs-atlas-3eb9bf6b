@@ -1,0 +1,135 @@
+---
+title: "Dropdown"
+description: "A composable dropdown component with a separate item primitive, outside-click dismissal, and support for both link and button items."
+---
+
+The dropdown system consists of two components:
+
+- **`Dropdown`** — the container that shows or hides its children based on `isOpen`.
+- **`DropdownItem`** — a single item inside the dropdown, rendered as either a `<button>` or an `<a>` tag.
+
+```tsx
+import { Dropdown } from "@/components/ui/dropdown/Dropdown";
+import { DropdownItem } from "@/components/ui/dropdown/DropdownItem";
+```
+
+## `Dropdown` props
+
+<ParamField path="isOpen" type="boolean" required>
+  Controls whether the dropdown is rendered. When `false` the component returns `null`.
+</ParamField>
+
+<ParamField path="onClose" type="() => void" required>
+  Called when a click is detected outside the dropdown container. The handler should set `isOpen` to `false`.
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  The dropdown content — typically a list of `DropdownItem` elements.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes applied to the dropdown container. Useful for controlling `min-w`, `w`, or other layout properties.
+</ParamField>
+
+<Note>
+  The dropdown container is positioned `absolute right-0 mt-2` by default. Wrap it in a `relative` container alongside your trigger element.
+</Note>
+
+## `DropdownItem` props
+
+<ParamField path="children" type="ReactNode" required>
+  The label or content of the item.
+</ParamField>
+
+<ParamField path="tag" type="button | a" default="button">
+  The underlying element. Use `a` together with `href` to render a Next.js `<Link>`.
+</ParamField>
+
+<ParamField path="href" type="string">
+  The navigation target. Only used when `tag` is `a`.
+</ParamField>
+
+<ParamField path="onClick" type="() => void">
+  Callback fired when the item is clicked.
+</ParamField>
+
+<ParamField path="onItemClick" type="() => void">
+  Secondary callback fired after `onClick`. Useful for closing the dropdown from within the item without coupling item logic to parent state.
+</ParamField>
+
+<ParamField path="baseClassName" type="string" default="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+  Base Tailwind classes applied to the item. Override this to replace the default styles entirely.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional classes merged on top of `baseClassName`.
+</ParamField>
+
+## Outside-click dismissal
+
+`Dropdown` attaches a `mousedown` listener to `document` and calls `onClose` when the click target is outside both the dropdown container and any element with the `.dropdown-toggle` class. This lets you keep the trigger button open while the dropdown is visible without an immediate close.
+
+## Basic usage
+
+```tsx
+"use client";
+import { useState } from "react";
+import { Dropdown } from "@/components/ui/dropdown/Dropdown";
+import { DropdownItem } from "@/components/ui/dropdown/DropdownItem";
+import Button from "@/components/ui/button/Button";
+
+export default function ExampleDropdown() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative inline-block">
+      <Button
+        variant="outline"
+        className="dropdown-toggle"
+        onClick={() => setIsOpen((prev) => !prev)}
+      >
+        Options
+      </Button>
+
+      <Dropdown isOpen={isOpen} onClose={() => setIsOpen(false)}>
+        <DropdownItem onItemClick={() => setIsOpen(false)}>
+          Edit
+        </DropdownItem>
+        <DropdownItem onItemClick={() => setIsOpen(false)}>
+          Duplicate
+        </DropdownItem>
+        <DropdownItem onItemClick={() => setIsOpen(false)}>
+          Delete
+        </DropdownItem>
+      </Dropdown>
+    </div>
+  );
+}
+```
+
+## Link items
+
+Use `tag="a"` and `href` to navigate to another page when the item is clicked:
+
+```tsx
+<Dropdown isOpen={isOpen} onClose={() => setIsOpen(false)}>
+  <DropdownItem
+    tag="a"
+    href="/profile"
+    onItemClick={() => setIsOpen(false)}
+  >
+    View profile
+  </DropdownItem>
+  <DropdownItem
+    tag="a"
+    href="/settings"
+    onItemClick={() => setIsOpen(false)}
+  >
+    Settings
+  </DropdownItem>
+</Dropdown>
+```
+
+<Tip>
+  Add the `dropdown-toggle` class to your trigger button so that the outside-click handler in `Dropdown` ignores clicks on the trigger, preventing an immediate re-close when you click the button while the dropdown is already open.
+</Tip>

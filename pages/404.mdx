@@ -1,0 +1,115 @@
+---
+title: "404 page"
+description: "The custom not-found page shown when a route does not exist, rendered using the full-width layout with no sidebar."
+---
+
+TailAdmin ships with two 404 experiences that share identical markup:
+
+- **`src/app/not-found.tsx`** — Next.js catches unmatched routes and renders this automatically.
+- **`src/app/(full-width-pages)/(error-pages)/error-404/page.tsx`** — A navigable route at **`/error-404`** you can link to directly.
+
+Both use the full-width layout — no sidebar or application header is rendered.
+
+## Routes and layout
+
+| Detail | Value |
+|---|---|
+| Automatic 404 | Any unmatched URL (handled by Next.js `not-found.tsx`) |
+| Navigable route | `/error-404` |
+| Layout | `src/app/(full-width-pages)/layout.tsx` (no sidebar) |
+
+## Page source
+
+Both files contain the same JSX:
+
+```tsx
+// src/app/not-found.tsx
+import GridShape from "@/components/common/GridShape";
+import Image from "next/image";
+import Link from "next/link";
+
+export default function NotFound() {
+  return (
+    <div className="relative flex flex-col items-center justify-center min-h-screen p-6 overflow-hidden z-1">
+      <GridShape />
+      <div className="mx-auto w-full max-w-[242px] text-center sm:max-w-[472px]">
+        <h1 className="mb-8 font-bold text-gray-800 text-title-md dark:text-white/90 xl:text-title-2xl">
+          ERROR
+        </h1>
+
+        {/* Light mode image */}
+        <Image src="/images/error/404.svg" alt="404" className="dark:hidden" width={472} height={152} />
+        {/* Dark mode image */}
+        <Image src="/images/error/404-dark.svg" alt="404" className="hidden dark:block" width={472} height={152} />
+
+        <p className="mt-10 mb-6 text-base text-gray-700 dark:text-gray-400 sm:text-lg">
+          We can&apos;t seem to find the page you are looking for!
+        </p>
+
+        <Link
+          href="/"
+          className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-3.5 text-sm font-medium text-gray-700 ..."
+        >
+          Back to Home Page
+        </Link>
+      </div>
+
+      <p className="absolute text-sm text-center text-gray-500 -translate-x-1/2 bottom-6 left-1/2 dark:text-gray-400">
+        &copy; {new Date().getFullYear()} - TailAdmin
+      </p>
+    </div>
+  );
+}
+```
+
+## Visual elements
+
+| Element | Details |
+|---|---|
+| **`GridShape`** | Decorative SVG background grid, absolutely positioned |
+| **Error image** | SVG at `/images/error/404.svg` (light) and `/images/error/404-dark.svg` (dark) |
+| **Heading** | `ERROR` in bold, scales from `text-title-md` to `xl:text-title-2xl` |
+| **Message** | "We can't seem to find the page you are looking for!" |
+| **CTA button** | **Back to Home Page** link to `/` |
+| **Footer** | Copyright year with `new Date().getFullYear()` |
+
+## Customising the 404 page
+
+### Change the message
+
+Edit the `<p>` tag text in `src/app/not-found.tsx`:
+
+```tsx
+<p className="mt-10 mb-6 text-base text-gray-700 dark:text-gray-400 sm:text-lg">
+  The page you requested has moved or no longer exists.
+</p>
+```
+
+### Change the illustration
+
+Replace the SVG files at `public/images/error/404.svg` and `public/images/error/404-dark.svg` with your own artwork, keeping the same filenames, or update the `src` props on both `Image` components:
+
+```tsx
+<Image src="/images/error/custom-404.svg" alt="404" className="dark:hidden" width={472} height={152} />
+<Image src="/images/error/custom-404-dark.svg" alt="404" className="hidden dark:block" width={472} height={152} />
+```
+
+### Add a search box or links
+
+Insert additional content between the message paragraph and the **Back to Home Page** button:
+
+```tsx
+<p>We can&apos;t seem to find the page you are looking for!</p>
+
+{/* Additional help links */}
+<div className="flex gap-3 justify-center mb-6">
+  <Link href="/docs">Documentation</Link>
+  <Link href="/support">Support</Link>
+</div>
+
+<Link href="/">Back to Home Page</Link>
+```
+
+<Note>
+  Next.js automatically serves `not-found.tsx` for all unmatched routes. The `/error-404` page is a separate navigable URL — useful for testing the layout or linking to it from other error states in your application.
+</Note>

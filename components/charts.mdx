@@ -1,0 +1,284 @@
+---
+title: "Charts"
+description: "Bar and line charts powered by ApexCharts, dynamically imported to avoid SSR issues in Next.js."
+---
+
+TailAdmin's chart components wrap [react-apexcharts](https://apexcharts.com/docs/react-charts/) using Next.js `dynamic` imports with `ssr: false`. This prevents server-side rendering errors because ApexCharts relies on browser APIs.
+
+<Note>
+  `apexcharts` and `react-apexcharts` are already included as dependencies in TailAdmin. You do not need to install them separately.
+</Note>
+
+## The dynamic import pattern
+
+Every chart component in TailAdmin follows the same wrapper pattern:
+
+```tsx
+"use client";
+import dynamic from "next/dynamic";
+import { ApexOptions } from "apexcharts";
+
+const ReactApexChart = dynamic(() => import("react-apexcharts"), {
+  ssr: false,
+});
+```
+
+Always mark chart components with `"use client"` and use `dynamic` import. Without this, Next.js will throw a `window is not defined` error during server rendering.
+
+---
+
+## Bar chart
+
+The `BarChartOne` component renders a vertical bar chart with monthly categories on the x-axis.
+
+```tsx
+import BarChartOne from "@/components/charts/bar/BarChartOne";
+
+<BarChartOne />
+```
+
+### Full source
+
+```tsx
+"use client";
+import React from "react";
+import { ApexOptions } from "apexcharts";
+import dynamic from "next/dynamic";
+
+const ReactApexChart = dynamic(() => import("react-apexcharts"), {
+  ssr: false,
+});
+
+export default function BarChartOne() {
+  const options: ApexOptions = {
+    colors: ["#465fff"],
+    chart: {
+      fontFamily: "Outfit, sans-serif",
+      type: "bar",
+      height: 180,
+      toolbar: {
+        show: false,
+      },
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: "39%",
+        borderRadius: 5,
+        borderRadiusApplication: "end",
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    stroke: {
+      show: true,
+      width: 4,
+      colors: ["transparent"],
+    },
+    xaxis: {
+      categories: [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+      ],
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    legend: {
+      show: true,
+      position: "top",
+      horizontalAlign: "left",
+      fontFamily: "Outfit",
+    },
+    yaxis: {
+      title: { text: undefined },
+    },
+    grid: {
+      yaxis: { lines: { show: true } },
+    },
+    fill: { opacity: 1 },
+    tooltip: {
+      x: { show: false },
+      y: { formatter: (val: number) => `${val}` },
+    },
+  };
+
+  const series = [
+    {
+      name: "Sales",
+      data: [168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112],
+    },
+  ];
+
+  return (
+    <div className="max-w-full overflow-x-auto custom-scrollbar">
+      <div id="chartOne" className="min-w-[1000px]">
+        <ReactApexChart
+          options={options}
+          series={series}
+          type="bar"
+          height={180}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## Line chart
+
+The `LineChartOne` component renders a multi-series area chart (using ApexCharts' `"area"` type with a gradient fill) that plots two datasets — **Sales** and **Revenue** — over monthly categories.
+
+```tsx
+import LineChartOne from "@/components/charts/line/LineChartOne";
+
+<LineChartOne />
+```
+
+### Full source
+
+```tsx
+"use client";
+import React from "react";
+import { ApexOptions } from "apexcharts";
+import dynamic from "next/dynamic";
+
+const ReactApexChart = dynamic(() => import("react-apexcharts"), {
+  ssr: false,
+});
+
+export default function LineChartOne() {
+  const options: ApexOptions = {
+    legend: {
+      show: false,
+      position: "top",
+      horizontalAlign: "left",
+    },
+    colors: ["#465FFF", "#9CB9FF"],
+    chart: {
+      fontFamily: "Outfit, sans-serif",
+      height: 310,
+      type: "line",
+      toolbar: { show: false },
+    },
+    stroke: {
+      curve: "straight",
+      width: [2, 2],
+    },
+    fill: {
+      type: "gradient",
+      gradient: {
+        opacityFrom: 0.55,
+        opacityTo: 0,
+      },
+    },
+    markers: {
+      size: 0,
+      strokeColors: "#fff",
+      strokeWidth: 2,
+      hover: { size: 6 },
+    },
+    grid: {
+      xaxis: { lines: { show: false } },
+      yaxis: { lines: { show: true } },
+    },
+    dataLabels: { enabled: false },
+    tooltip: {
+      enabled: true,
+      x: { format: "dd MMM yyyy" },
+    },
+    xaxis: {
+      type: "category",
+      categories: [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+      ],
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      tooltip: { enabled: false },
+    },
+    yaxis: {
+      labels: {
+        style: {
+          fontSize: "12px",
+          colors: ["#6B7280"],
+        },
+      },
+      title: {
+        text: "",
+        style: { fontSize: "0px" },
+      },
+    },
+  };
+
+  const series = [
+    {
+      name: "Sales",
+      data: [180, 190, 170, 160, 175, 165, 170, 205, 230, 210, 240, 235],
+    },
+    {
+      name: "Revenue",
+      data: [40, 30, 50, 40, 55, 40, 70, 100, 110, 120, 150, 140],
+    },
+  ];
+
+  return (
+    <div className="max-w-full overflow-x-auto custom-scrollbar">
+      <div id="chartEight" className="min-w-[1000px]">
+        <ReactApexChart
+          options={options}
+          series={series}
+          type="area"
+          height={310}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## Configuring chart options
+
+Both components use the `ApexOptions` type from `apexcharts` to keep chart configuration type-safe. The key properties to customise are:
+
+| Property | What it controls |
+|---|---|
+| `colors` | Series fill/stroke colours |
+| `chart.height` | Chart height in pixels |
+| `chart.toolbar.show` | Show or hide the download/zoom toolbar |
+| `xaxis.categories` | Labels along the x-axis |
+| `stroke.curve` | Line style: `"straight"`, `"smooth"`, or `"stepline"` |
+| `fill.gradient` | Gradient opacity for area charts |
+| `tooltip` | Tooltip display and value formatting |
+
+<Tip>
+  To build a new chart, copy either component as a starting point, change the `type` passed to `ReactApexChart`, update `series` with your own data, and adjust `options` to match. All standard ApexCharts configuration options are available through the `ApexOptions` type.
+</Tip>
+
+## Adding a new series
+
+To plot additional data on the line chart, add an entry to the `series` array and a matching colour to `options.colors`:
+
+```tsx
+const series = [
+  {
+    name: "Sales",
+    data: [180, 190, 170, 160, 175, 165, 170, 205, 230, 210, 240, 235],
+  },
+  {
+    name: "Revenue",
+    data: [40, 30, 50, 40, 55, 40, 70, 100, 110, 120, 150, 140],
+  },
+  {
+    name: "Expenses",
+    data: [20, 25, 30, 28, 35, 30, 45, 60, 70, 80, 90, 85],
+  },
+];
+
+// Add a matching colour entry:
+colors: ["#465FFF", "#9CB9FF", "#F97316"]
+```

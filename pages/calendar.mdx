@@ -1,0 +1,219 @@
+---
+title: "Calendar page"
+description: "The calendar page at /calendar, powered by FullCalendar with support for creating, editing, and deleting events via a modal."
+---
+
+The calendar page lives at **`/calendar`** inside the admin route group. It renders a **`PageBreadcrumb`** and the **`Calendar`** component, which is a full-featured interactive calendar built on [FullCalendar](https://fullcalendar.io/).
+
+## Route and layout
+
+| Detail | Value |
+|---|---|
+| Route | `/calendar` |
+| Page file | `src/app/(admin)/(others-pages)/calendar/page.tsx` |
+| Layout | Admin layout (sidebar + header) |
+| Calendar component | `src/components/calendar/Calendar.tsx` |
+
+## Page structure
+
+```tsx
+// src/app/(admin)/(others-pages)/calendar/page.tsx
+import Calendar from "@/components/calendar/Calendar";
+import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+
+export default function page() {
+  return (
+    <div>
+      <PageBreadcrumb pageTitle="Calendar" />
+      <Calendar />
+    </div>
+  );
+}
+```
+
+## FullCalendar integration
+
+The **`Calendar`** component is a client component (`"use client"`) that uses the following FullCalendar packages — all already installed in the template:
+
+| Package | Purpose |
+|---|---|
+| `@fullcalendar/core` | Core calendar engine |
+| `@fullcalendar/react` | React wrapper (`FullCalendar` component) |
+| `@fullcalendar/daygrid` | Month and day-grid views (`dayGridMonth`) |
+| `@fullcalendar/timegrid` | Week and day time-grid views (`timeGridWeek`, `timeGridDay`) |
+| `@fullcalendar/interaction` | Click and drag-select interactions |
+| `@fullcalendar/list` | List view (available to add) |
+
+```tsx
+// src/components/calendar/Calendar.tsx
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin    from "@fullcalendar/daygrid";
+import timeGridPlugin   from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+
+<FullCalendar
+  ref={calendarRef}
+  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+  initialView="dayGridMonth"
+  headerToolbar={{
+    left: "prev,next addEventButton",
+    center: "title",
+    right: "dayGridMonth,timeGridWeek,timeGridDay",
+  }}
+  events={events}
+  selectable={true}
+  select={handleDateSelect}
+  eventClick={handleEventClick}
+  eventContent={renderEventContent}
+  customButtons={{
+    addEventButton: {
+      text: "Add Event +",
+      click: openModal,
+    },
+  }}
+/>
+```
+
+## Event data model
+
+Each event extends FullCalendar's `EventInput` with a custom `extendedProps.calendar` field used to colour-code events:
+
+```tsx
+interface CalendarEvent extends EventInput {
+  extendedProps: {
+    calendar: string; // "Danger" | "Success" | "Primary" | "Warning"
+  };
+}
+```
+
+The template seeds three example events on mount:
+
+```tsx
+useEffect(() => {
+  setEvents([
+    {
+      id: "1",
+      title: "Event Conf.",
+      start: new Date().toISOString().split("T")[0],
+      extendedProps: { calendar: "Danger" },
+    },
+    {
+      id: "2",
+      title: "Meeting",
+      start: new Date(Date.now() + 86400000).toISOString().split("T")[0],
+      extendedProps: { calendar: "Success" },
+    },
+    {
+      id: "3",
+      title: "Workshop",
+      start: new Date(Date.now() + 172800000).toISOString().split("T")[0],
+      end:   new Date(Date.now() + 259200000).toISOString().split("T")[0],
+      extendedProps: { calendar: "Primary" },
+    },
+  ]);
+}, []);
+```
+
+## Event handling
+
+### Selecting a date range to add an event
+
+When the user drags across dates, `handleDateSelect` fires, pre-populates the start and end date fields, and opens the modal:
+
+```tsx
+const handleDateSelect = (selectInfo: DateSelectArg) => {
+  resetModalFields();
+  setEventStartDate(selectInfo.startStr);
+  setEventEndDate(selectInfo.endStr || selectInfo.startStr);
+  openModal();
+};
+```
+
+### Clicking an existing event to edit it
+
+`handleEventClick` reads the clicked event's properties into state and opens the modal in edit mode:
+
+```tsx
+const handleEventClick = (clickInfo: EventClickArg) => {
+  const event = clickInfo.event;
+  setSelectedEvent(event as unknown as CalendarEvent);
+  setEventTitle(event.title);
+  setEventStartDate(event.start?.toISOString().split("T")[0] || "");
+  setEventEndDate(event.end?.toISOString().split("T")[0] || "");
+  setEventLevel(event.extendedProps.calendar);
+  openModal();
+};
+```
+
+### Saving or updating an event
+
+`handleAddOrUpdateEvent` either updates an existing event or appends a new one to the `events` state array:
+
+```tsx
+const handleAddOrUpdateEvent = () => {
+  if (selectedEvent) {
+    // update
+    setEvents((prev) =>
+      prev.map((e) =>
+        e.id === selectedEvent.id
+          ? { ...e, title: eventTitle, start: eventStartDate, end: eventEndDate, extendedProps: { calendar: eventLevel } }
+          : e
+      )
+    );
+  } else {
+    // add
+    const newEvent: CalendarEvent = {
+      id: Date.now().toString(),
+      title: eventTitle,
+      start: eventStartDate,
+      end: eventEndDate,
+      allDay: true,
+      extendedProps: { calendar: eventLevel },
+    };
+    setEvents((prev) => [...prev, newEvent]);
+  }
+  closeModal();
+};
+```
+
+## Persisting events to a backend
+
+<Steps>
+  <Step title="Fetch initial events from your API">
+    Replace the `useEffect` seed data with a fetch call:
+
+    ```tsx
+    useEffect(() => {
+      fetch("/api/events")
+        .then((r) => r.json())
+        .then(setEvents);
+    }, []);
+    ```
+  </Step>
+  <Step title="Save new events on creation">
+    Inside `handleAddOrUpdateEvent`, call your API before updating local state:
+
+    ```tsx
+    await fetch("/api/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: eventTitle, start: eventStartDate, end: eventEndDate }),
+    });
+    ```
+  </Step>
+  <Step title="Update events on edit">
+    When `selectedEvent` is set, call a `PATCH` or `PUT` endpoint with the event id:
+
+    ```tsx
+    await fetch(`/api/events/${selectedEvent.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: eventTitle, start: eventStartDate, end: eventEndDate }),
+    });
+    ```
+  </Step>
+</Steps>
+
+<Info>
+  Event colours are controlled by the `extendedProps.calendar` value. The four built-in levels are `Danger`, `Success`, `Primary`, and `Warning`. Custom CSS classes prefixed with `fc-bg-` (e.g. `fc-bg-danger`) apply the corresponding colour in `renderEventContent`.
+</Info>

@@ -1,0 +1,683 @@
+---
+title: "Form elements"
+description: "A complete set of accessible form components including inputs, labels, selects, checkboxes, radio buttons, textareas, file inputs, switches, and phone inputs."
+---
+
+TailAdmin ships a collection of composable form components. Import each one from its own file under `@/components/form/`.
+
+## Form wrapper
+
+The `Form` component wraps a native `<form>` element and calls `event.preventDefault()` before forwarding the submit event to your handler.
+
+```tsx
+import Form from "@/components/form/Form";
+```
+
+### Props
+
+<ParamField path="onSubmit" type="(event: FormEvent<HTMLFormElement>) => void" required>
+  Called when the form is submitted. Default browser submission is prevented automatically.
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  Form content — any combination of fields, labels, and buttons.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes applied to the `<form>` element.
+</ParamField>
+
+```tsx
+import Form from "@/components/form/Form";
+
+<Form onSubmit={(e) => console.log("submitted")} className="space-y-4">
+  {/* fields go here */}
+</Form>
+```
+
+---
+
+## Label
+
+The `Label` component renders a styled `<label>` element using `twMerge` so you can override the default margin.
+
+```tsx
+import Label from "@/components/form/Label";
+```
+
+### Props
+
+<ParamField path="children" type="ReactNode" required>
+  The label text or content.
+</ParamField>
+
+<ParamField path="htmlFor" type="string">
+  Links the label to a form control by matching its `id`.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Tailwind classes merged with the defaults (`mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400`).
+</ParamField>
+
+```tsx
+import Label from "@/components/form/Label";
+
+<Label htmlFor="email">Email address</Label>
+```
+
+---
+
+## Input
+
+The `Input` component (exported as `Input` from `InputField.tsx`) renders a styled text-like input with built-in visual states for default, disabled, success, and error.
+
+```tsx
+import Input from "@/components/form/input/InputField";
+```
+
+### Props
+
+<ParamField path="type" type='"text" | "number" | "email" | "password" | "date" | "time" | string' default='"text"'>
+  The HTML input type.
+</ParamField>
+
+<ParamField path="id" type="string">
+  The `id` attribute, used to associate a `Label`.
+</ParamField>
+
+<ParamField path="name" type="string">
+  The `name` attribute submitted with form data.
+</ParamField>
+
+<ParamField path="placeholder" type="string">
+  Placeholder text shown when the input is empty.
+</ParamField>
+
+<ParamField path="defaultValue" type="string | number">
+  Initial uncontrolled value.
+</ParamField>
+
+<ParamField path="onChange" type="(e: React.ChangeEvent<HTMLInputElement>) => void">
+  Change handler for controlled usage.
+</ParamField>
+
+<ParamField path="min" type="string">
+  Minimum value (number/date inputs).
+</ParamField>
+
+<ParamField path="max" type="string">
+  Maximum value (number/date inputs).
+</ParamField>
+
+<ParamField path="step" type="number">
+  Step increment (number inputs).
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  Renders the input non-interactive with a `cursor-not-allowed` style.
+</ParamField>
+
+<ParamField path="success" type="boolean" default="false">
+  Applies green border and text styles to indicate a valid value.
+</ParamField>
+
+<ParamField path="error" type="boolean" default="false">
+  Applies red border and text styles to indicate a validation error.
+</ParamField>
+
+<ParamField path="hint" type="string">
+  Helper text rendered below the input. Uses red text when `error` is `true`, green when `success` is `true`, and gray otherwise.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes merged onto the `<input>` element.
+</ParamField>
+
+### Usage examples
+
+<CodeGroup>
+```tsx Default
+import Label from "@/components/form/Label";
+import Input from "@/components/form/input/InputField";
+
+<div>
+  <Label htmlFor="username">Username</Label>
+  <Input id="username" name="username" placeholder="Enter your username" />
+</div>
+```
+
+```tsx With hint
+import Label from "@/components/form/Label";
+import Input from "@/components/form/input/InputField";
+
+<div>
+  <Label htmlFor="email">Email</Label>
+  <Input
+    id="email"
+    type="email"
+    placeholder="info@example.com"
+    hint="We will never share your email."
+  />
+</div>
+```
+
+```tsx Error state
+import Label from "@/components/form/Label";
+import Input from "@/components/form/input/InputField";
+
+<div>
+  <Label htmlFor="email">Email</Label>
+  <Input
+    id="email"
+    type="email"
+    error
+    defaultValue="invalid-email"
+    hint="Please enter a valid email address."
+  />
+</div>
+```
+
+```tsx Success state
+import Label from "@/components/form/Label";
+import Input from "@/components/form/input/InputField";
+
+<div>
+  <Label htmlFor="username">Username</Label>
+  <Input
+    id="username"
+    success
+    defaultValue="johndoe"
+    hint="Username is available."
+  />
+</div>
+```
+
+```tsx Disabled
+import Label from "@/components/form/Label";
+import Input from "@/components/form/input/InputField";
+
+<div>
+  <Label htmlFor="readonly">Read-only field</Label>
+  <Input id="readonly" disabled defaultValue="Cannot edit this" />
+</div>
+```
+</CodeGroup>
+
+---
+
+## Select
+
+The `Select` component is a controlled single-value dropdown that internally manages its own state and calls your `onChange` handler when the value changes.
+
+```tsx
+import Select from "@/components/form/Select";
+```
+
+### Types
+
+```typescript
+interface Option {
+  value: string;
+  label: string;
+}
+```
+
+### Props
+
+<ParamField path="options" type="Option[]" required>
+  Array of `{ value, label }` objects that populate the dropdown.
+</ParamField>
+
+<ParamField path="onChange" type="(value: string) => void" required>
+  Called with the selected option's `value` string whenever the selection changes.
+</ParamField>
+
+<ParamField path="placeholder" type="string" default='"Select an option"'>
+  Disabled placeholder shown at the top of the option list.
+</ParamField>
+
+<ParamField path="defaultValue" type="string" default='""'>
+  Pre-selected option value on first render.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes applied to the `<select>` element.
+</ParamField>
+
+```tsx
+import Label from "@/components/form/Label";
+import Select from "@/components/form/Select";
+
+const countryOptions = [
+  { value: "us", label: "United States" },
+  { value: "uk", label: "United Kingdom" },
+  { value: "ca", label: "Canada" },
+];
+
+<div>
+  <Label htmlFor="country">Country</Label>
+  <Select
+    options={countryOptions}
+    placeholder="Select a country"
+    onChange={(value) => console.log(value)}
+  />
+</div>
+```
+
+---
+
+## TextArea
+
+The `TextArea` component renders a resizable multi-line text input with the same visual states as `Input`.
+
+```tsx
+import TextArea from "@/components/form/input/TextArea";
+```
+
+### Props
+
+<ParamField path="placeholder" type="string" default='"Enter your message"'>
+  Placeholder text shown when the textarea is empty.
+</ParamField>
+
+<ParamField path="rows" type="number" default="3">
+  Number of visible text lines.
+</ParamField>
+
+<ParamField path="value" type="string">
+  Controlled value.
+</ParamField>
+
+<ParamField path="onChange" type="(value: string) => void">
+  Called with the raw string value on every change.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  Renders the textarea non-interactive.
+</ParamField>
+
+<ParamField path="error" type="boolean" default="false">
+  Applies red focus ring to indicate a validation error.
+</ParamField>
+
+<ParamField path="hint" type="string">
+  Helper text rendered below the textarea.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes.
+</ParamField>
+
+```tsx
+import Label from "@/components/form/Label";
+import TextArea from "@/components/form/input/TextArea";
+
+<div>
+  <Label>Message</Label>
+  <TextArea
+    placeholder="Write your message here..."
+    rows={5}
+    hint="Maximum 500 characters."
+  />
+</div>
+```
+
+---
+
+## Checkbox
+
+The `Checkbox` component renders a fully styled checkbox with an SVG checkmark overlay. It is a controlled component — you manage the `checked` state.
+
+```tsx
+import Checkbox from "@/components/form/input/Checkbox";
+```
+
+### Props
+
+<ParamField path="checked" type="boolean" required>
+  Whether the checkbox is checked.
+</ParamField>
+
+<ParamField path="onChange" type="(checked: boolean) => void" required>
+  Called with the new boolean value when the checkbox is toggled.
+</ParamField>
+
+<ParamField path="label" type="string">
+  Text label rendered to the right of the checkbox.
+</ParamField>
+
+<ParamField path="id" type="string">
+  The `id` attribute on the underlying `<input>` element.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  Renders the checkbox non-interactive at 60% opacity.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional classes merged onto the `<input>` element.
+</ParamField>
+
+```tsx
+import { useState } from "react";
+import Checkbox from "@/components/form/input/Checkbox";
+
+function Example() {
+  const [accepted, setAccepted] = useState(false);
+
+  return (
+    <Checkbox
+      id="terms"
+      label="I agree to the terms and conditions"
+      checked={accepted}
+      onChange={setAccepted}
+    />
+  );
+}
+```
+
+---
+
+## Radio
+
+TailAdmin provides two radio button components: `Radio` (standard size) and `RadioSm` (compact size). Both are controlled components that work with a shared `name` to form a radio group.
+
+```tsx
+import Radio from "@/components/form/input/Radio";
+import RadioSm from "@/components/form/input/RadioSm";
+```
+
+### Props
+
+<ParamField path="id" type="string" required>
+  Unique ID for the radio input.
+</ParamField>
+
+<ParamField path="name" type="string" required>
+  Shared group name — all radios with the same `name` form a single-selection group.
+</ParamField>
+
+<ParamField path="value" type="string" required>
+  The value submitted when this radio is selected.
+</ParamField>
+
+<ParamField path="checked" type="boolean" required>
+  Whether this radio button is currently selected.
+</ParamField>
+
+<ParamField path="label" type="string" required>
+  Text label rendered next to the radio circle.
+</ParamField>
+
+<ParamField path="onChange" type="(value: string) => void" required>
+  Called with this radio's `value` string when selected.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  (`Radio` only) Prevents selection and applies muted text styles.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes.
+</ParamField>
+
+```tsx
+import { useState } from "react";
+import Radio from "@/components/form/input/Radio";
+
+function Example() {
+  const [plan, setPlan] = useState("monthly");
+
+  return (
+    <div className="flex flex-col gap-3">
+      <Radio
+        id="monthly"
+        name="billing"
+        value="monthly"
+        label="Monthly"
+        checked={plan === "monthly"}
+        onChange={setPlan}
+      />
+      <Radio
+        id="annual"
+        name="billing"
+        value="annual"
+        label="Annual"
+        checked={plan === "annual"}
+        onChange={setPlan}
+      />
+    </div>
+  );
+}
+```
+
+---
+
+## Switch
+
+The `Switch` component renders a toggle that manages its own on/off state internally and calls `onChange` when flipped.
+
+```tsx
+import Switch from "@/components/form/switch/Switch";
+```
+
+### Props
+
+<ParamField path="label" type="string" required>
+  Text label rendered next to the toggle.
+</ParamField>
+
+<ParamField path="defaultChecked" type="boolean" default="false">
+  Initial on/off state.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  Prevents toggling and applies muted styles.
+</ParamField>
+
+<ParamField path="onChange" type="(checked: boolean) => void">
+  Called with the new boolean state after each toggle.
+</ParamField>
+
+<ParamField path="color" type='"blue" | "gray"' default='"blue"'>
+  Color theme of the active track. **blue** uses `bg-brand-500`; **gray** uses `bg-gray-800`.
+</ParamField>
+
+<CodeGroup>
+```tsx Blue (default)
+import Switch from "@/components/form/switch/Switch";
+
+<Switch
+  label="Enable notifications"
+  defaultChecked
+  onChange={(checked) => console.log(checked)}
+/>
+```
+
+```tsx Gray
+import Switch from "@/components/form/switch/Switch";
+
+<Switch
+  label="Dark mode"
+  color="gray"
+  onChange={(checked) => console.log(checked)}
+/>
+```
+
+```tsx Disabled
+import Switch from "@/components/form/switch/Switch";
+
+<Switch label="Feature unavailable" disabled />
+```
+</CodeGroup>
+
+---
+
+## File input
+
+The `FileInput` component renders a styled native file picker.
+
+```tsx
+import FileInput from "@/components/form/input/FileInput";
+```
+
+### Props
+
+<ParamField path="onChange" type="(event: React.ChangeEvent<HTMLInputElement>) => void">
+  Called when the user selects a file.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes merged onto the `<input>` element.
+</ParamField>
+
+```tsx
+import Label from "@/components/form/Label";
+import FileInput from "@/components/form/input/FileInput";
+
+<div>
+  <Label>Upload document</Label>
+  <FileInput onChange={(e) => console.log(e.target.files)} />
+</div>
+```
+
+---
+
+## Phone input
+
+The `PhoneInput` component combines a country-code dropdown with a telephone text field. The dropdown can appear at the start or end of the input.
+
+```tsx
+import PhoneInput from "@/components/form/group-input/PhoneInput";
+```
+
+### Types
+
+```typescript
+interface CountryCode {
+  code: string;  // e.g. "US", "GB"
+  label: string; // e.g. "+1", "+44"
+}
+```
+
+### Props
+
+<ParamField path="countries" type="CountryCode[]" required>
+  Array of country objects used to populate the dropdown. Each entry has a `code` (select option value) and `label` (dialing prefix shown in the phone field).
+</ParamField>
+
+<ParamField path="placeholder" type="string" default='"+1 (555) 000-0000"'>
+  Placeholder for the phone number input.
+</ParamField>
+
+<ParamField path="onChange" type="(phoneNumber: string) => void">
+  Called with the current phone number string whenever either field changes.
+</ParamField>
+
+<ParamField path="selectPosition" type='"start" | "end"' default='"start"'>
+  Positions the country-code dropdown at the left or right edge of the input.
+</ParamField>
+
+<CodeGroup>
+```tsx Dropdown at start
+import PhoneInput from "@/components/form/group-input/PhoneInput";
+
+const countries = [
+  { code: "US", label: "+1" },
+  { code: "GB", label: "+44" },
+  { code: "CA", label: "+1" },
+];
+
+<PhoneInput
+  countries={countries}
+  onChange={(phone) => console.log(phone)}
+/>
+```
+
+```tsx Dropdown at end
+import PhoneInput from "@/components/form/group-input/PhoneInput";
+
+const countries = [
+  { code: "US", label: "+1" },
+  { code: "GB", label: "+44" },
+];
+
+<PhoneInput
+  countries={countries}
+  selectPosition="end"
+  onChange={(phone) => console.log(phone)}
+/>
+```
+</CodeGroup>
+
+---
+
+## Complete form example
+
+```tsx
+import { useState } from "react";
+import Form from "@/components/form/Form";
+import Label from "@/components/form/Label";
+import Input from "@/components/form/input/InputField";
+import Select from "@/components/form/Select";
+import TextArea from "@/components/form/input/TextArea";
+import Checkbox from "@/components/form/input/Checkbox";
+import Switch from "@/components/form/switch/Switch";
+
+export default function ContactForm() {
+  const [accepted, setAccepted] = useState(false);
+  const [notifications, setNotifications] = useState(false);
+
+  const roleOptions = [
+    { value: "admin", label: "Admin" },
+    { value: "editor", label: "Editor" },
+    { value: "viewer", label: "Viewer" },
+  ];
+
+  return (
+    <Form
+      onSubmit={() => console.log("submitted")}
+      className="space-y-5"
+    >
+      <div>
+        <Label htmlFor="name">Full name</Label>
+        <Input id="name" name="name" placeholder="Jane Doe" />
+      </div>
+
+      <div>
+        <Label htmlFor="email">Email</Label>
+        <Input id="email" type="email" placeholder="jane@example.com" />
+      </div>
+
+      <div>
+        <Label>Role</Label>
+        <Select
+          options={roleOptions}
+          onChange={(value) => console.log(value)}
+        />
+      </div>
+
+      <div>
+        <Label>Message</Label>
+        <TextArea placeholder="Your message..." rows={4} />
+      </div>
+
+      <Checkbox
+        id="terms"
+        label="I agree to the terms"
+        checked={accepted}
+        onChange={setAccepted}
+      />
+
+      <Switch
+        label="Email notifications"
+        onChange={setNotifications}
+      />
+
+      <button type="submit" className="btn-primary">
+        Submit
+      </button>
+    </Form>
+  );
+}
+```

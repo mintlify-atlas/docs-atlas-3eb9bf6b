@@ -1,0 +1,90 @@
+---
+title: "Installation"
+description: "Get TailAdmin running on your machine in minutes."
+---
+
+TailAdmin is a free, open-source admin dashboard template built on **Next.js 16** and **Tailwind CSS v4**. This guide walks you through cloning the repository, installing dependencies, and starting the development server.
+
+## Prerequisites
+
+Before you begin, make sure you have the following installed:
+
+- **Node.js 18.x or later** — Node.js 20.x or later is recommended. Download it from [nodejs.org](https://nodejs.org).
+- **Git** — required to clone the repository.
+
+## Steps
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/TailAdmin/free-nextjs-admin-dashboard.git
+    ```
+
+    <Note>
+      **Windows users:** if you encounter issues while cloning, place the repository closer to the root of your drive (for example, `C:\projects\tailadmin`) to avoid path-length limitations.
+    </Note>
+  </Step>
+
+  <Step title="Move into the project directory">
+    ```bash
+    cd free-nextjs-admin-dashboard
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    <CodeGroup>
+      ```bash npm
+      npm install
+      ```
+
+      ```bash yarn
+      yarn install
+      ```
+
+      ```bash pnpm
+      pnpm install
+      ```
+    </CodeGroup>
+
+    <Note>
+      If you see a peer-dependency error during installation, re-run the command with the `--legacy-peer-deps` flag:
+
+      ```bash
+      npm install --legacy-peer-deps
+      ```
+
+      The template ships with `overrides` in `package.json` to handle the `@react-jvectormap` packages, which declare older React peer dependencies, so this flag is rarely needed.
+    </Note>
+  </Step>
+
+  <Step title="Start the development server">
+    <CodeGroup>
+      ```bash npm
+      npm run dev
+      ```
+
+      ```bash yarn
+      yarn dev
+      ```
+
+      ```bash pnpm
+      pnpm dev
+      ```
+    </CodeGroup>
+
+    Open [http://localhost:3000](http://localhost:3000) in your browser. You should see the TailAdmin dashboard.
+  </Step>
+</Steps>
+
+## Available scripts
+
+| Script | Description |
+|---|---|
+| `dev` | Starts the Next.js development server |
+| `build` | Creates a production build |
+| `start` | Serves the production build locally |
+| `lint` | Runs ESLint across the project |
+
+## Next steps
+
+Once the server is running, explore the [project structure](/getting-started/project-structure) to understand how the codebase is organised.

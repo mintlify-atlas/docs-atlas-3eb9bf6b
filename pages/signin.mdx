@@ -1,0 +1,153 @@
+---
+title: "Sign in page"
+description: "The sign-in page at /signin, rendered using the full-width layout with no sidebar."
+---
+
+The sign-in page lives at **`/signin`** inside the `(full-width-pages)/(auth)/signin/` route group. It renders the **`SignInForm`** component and uses the full-width layout — there is no sidebar or application header on this page.
+
+## Route and layout
+
+| Detail | Value |
+|---|---|
+| Route | `/signin` |
+| Page file | `src/app/(full-width-pages)/(auth)/signin/page.tsx` |
+| Layout | `src/app/(full-width-pages)/layout.tsx` (no sidebar) |
+| Form component | `src/components/auth/SignInForm.tsx` |
+
+The full-width layout is a minimal wrapper that renders `children` without any chrome:
+
+```tsx
+// src/app/(full-width-pages)/layout.tsx
+export default function FullWidthPageLayout({ children }) {
+  return <div>{children}</div>;
+}
+```
+
+## Page structure
+
+The page file simply re-exports **`SignInForm`**:
+
+```tsx
+// src/app/(full-width-pages)/(auth)/signin/page.tsx
+import SignInForm from "@/components/auth/SignInForm";
+
+export default function SignIn() {
+  return <SignInForm />;
+}
+```
+
+## Form component
+
+**`SignInForm`** is a client component (`"use client"`) that renders:
+
+- A **back to dashboard** link that navigates to `/`
+- Two **social sign-in buttons** — Google and X (Twitter)
+- An **email/password form** with a show/hide password toggle
+- A **"Keep me logged in"** checkbox
+- A **"Forgot password?"** link pointing to `/reset-password`
+- A **Sign in** button
+- A link to the sign-up page (`/signup`)
+
+```tsx
+// src/components/auth/SignInForm.tsx (structure)
+export default function SignInForm() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
+
+  return (
+    <div className="flex flex-col flex-1 lg:w-1/2 w-full">
+      {/* Back link */}
+      <Link href="/">Back to dashboard</Link>
+
+      {/* Social buttons */}
+      <button>Sign in with Google</button>
+      <button>Sign in with X</button>
+
+      {/* Email / password form */}
+      <form>
+        <Label>Email</Label>
+        <Input type="email" placeholder="info@gmail.com" />
+
+        <Label>Password</Label>
+        <Input type={showPassword ? "text" : "password"} />
+
+        <Checkbox checked={isChecked} onChange={setIsChecked} />
+        <span>Keep me logged in</span>
+
+        <Link href="/reset-password">Forgot password?</Link>
+
+        <Button className="w-full" size="sm">Sign in</Button>
+      </form>
+
+      <Link href="/signup">Sign Up</Link>
+    </div>
+  );
+}
+```
+
+## Connecting real authentication
+
+<Steps>
+  <Step title="Install an auth library">
+    Install NextAuth.js (or your preferred auth solution):
+
+    ```bash
+    npm install next-auth
+    ```
+  </Step>
+  <Step title="Create a route handler">
+    Add an API route to handle auth callbacks:
+
+    ```tsx
+    // src/app/api/auth/[...nextauth]/route.ts
+    import NextAuth from "next-auth";
+    import Providers from "next-auth/providers";
+
+    const handler = NextAuth({
+      providers: [
+        Providers.Credentials({
+          async authorize(credentials) {
+            // validate credentials against your API
+          },
+        }),
+      ],
+    });
+
+    export { handler as GET, handler as POST };
+    ```
+  </Step>
+  <Step title="Wire the form to signIn">
+    Inside **`SignInForm`**, call `signIn` from `next-auth/react` on form submit:
+
+    ```tsx
+    import { signIn } from "next-auth/react";
+
+    async function handleSubmit(e: React.FormEvent) {
+      e.preventDefault();
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+      if (result?.error) {
+        // show error
+      } else {
+        router.push("/");
+      }
+    }
+    ```
+  </Step>
+  <Step title="Connect social providers">
+    Wire the Google and X buttons to the appropriate `signIn` provider calls:
+
+    ```tsx
+    <button onClick={() => signIn("google", { callbackUrl: "/" })}>
+      Sign in with Google
+    </button>
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  The sign-in form does not include any built-in form validation. Add validation using a library such as `react-hook-form` + `zod` before connecting to a real auth backend.
+</Note>

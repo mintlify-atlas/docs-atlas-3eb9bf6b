@@ -1,0 +1,130 @@
+---
+title: "Multi-select"
+description: "A custom dropdown component that lets users select multiple options, displayed as removable tags inside the input field."
+---
+
+The `MultiSelect` component renders a dropdown where users can toggle multiple options on and off. Selected values appear as pill tags inside the trigger area and can be individually removed.
+
+```tsx
+import MultiSelect from "@/components/form/MultiSelect";
+```
+
+## Types
+
+```typescript
+interface Option {
+  value: string;    // unique identifier used in callbacks
+  text: string;     // display label shown in the dropdown and as a tag
+  selected: boolean; // initial selection state of the option
+}
+
+interface MultiSelectProps {
+  label: string;
+  options: Option[];
+  defaultSelected?: string[]; // array of `value` strings pre-selected on mount
+  onChange?: (selected: string[]) => void;
+  disabled?: boolean;
+}
+```
+
+## Props
+
+<ParamField path="label" type="string" required>
+  Label text rendered above the dropdown trigger.
+</ParamField>
+
+<ParamField path="options" type="Option[]" required>
+  Array of option objects. Each entry requires a `value` string, a `text` string, and a `selected` boolean (used for documentation purposes — actual initial selection is controlled by `defaultSelected`).
+</ParamField>
+
+<ParamField path="defaultSelected" type="string[]" default="[]">
+  Array of `value` strings that should be selected when the component first renders.
+</ParamField>
+
+<ParamField path="onChange" type="(selected: string[]) => void">
+  Called with the full array of currently selected `value` strings after every selection or deselection.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  Prevents the dropdown from opening when `true`.
+</ParamField>
+
+## Usage example
+
+```tsx
+import MultiSelect from "@/components/form/MultiSelect";
+
+const skillOptions = [
+  { value: "react", text: "React", selected: false },
+  { value: "typescript", text: "TypeScript", selected: false },
+  { value: "nextjs", text: "Next.js", selected: false },
+  { value: "tailwind", text: "Tailwind CSS", selected: false },
+  { value: "nodejs", text: "Node.js", selected: false },
+];
+
+export default function SkillSelector() {
+  return (
+    <MultiSelect
+      label="Skills"
+      options={skillOptions}
+      defaultSelected={["react", "typescript"]}
+      onChange={(selected) => {
+        console.log("Selected values:", selected);
+      }}
+    />
+  );
+}
+```
+
+## Handling the selection callback
+
+The `onChange` callback fires whenever the user selects or deselects an option, or removes a tag using the **×** button inside the trigger area. It always receives the complete current selection as an array of `value` strings.
+
+```tsx
+import { useState } from "react";
+import MultiSelect from "@/components/form/MultiSelect";
+
+const categoryOptions = [
+  { value: "news", text: "News", selected: false },
+  { value: "updates", text: "Updates", selected: false },
+  { value: "promotions", text: "Promotions", selected: false },
+];
+
+export default function NotificationPreferences() {
+  const [categories, setCategories] = useState<string[]>([]);
+
+  return (
+    <div className="max-w-sm">
+      <MultiSelect
+        label="Notification categories"
+        options={categoryOptions}
+        onChange={setCategories}
+      />
+      <p className="mt-2 text-sm text-gray-500">
+        Selected: {categories.join(", ") || "none"}
+      </p>
+    </div>
+  );
+}
+```
+
+## Disabled state
+
+```tsx
+<MultiSelect
+  label="Locked selection"
+  options={skillOptions}
+  defaultSelected={["react"]}
+  disabled
+/>
+```
+
+<Note>
+  When `disabled` is `true`, clicking either the trigger area or the chevron button has no effect. The component visually remains unchanged — you may want to apply additional opacity styles via `className` on a wrapper element to communicate the disabled state to users.
+</Note>
+
+## How it works
+
+The component maintains two pieces of internal state: `selectedOptions` (the array of selected `value` strings) and `isOpen` (whether the dropdown is visible). Clicking a row in the dropdown calls `handleSelect`, which toggles the value in or out of the array. Clicking the **×** on a tag calls `removeOption`, which filters that value out. Both actions call `onChange` with the updated array.
+
+The chevron icon rotates 180° when `isOpen` is `true`, providing a visual open/closed indicator.

@@ -1,0 +1,172 @@
+---
+title: "Images"
+description: "Three image layout components — responsive single image, two-column grid, and three-column grid — built with Next.js Image optimisation."
+---
+
+TailAdmin provides three image layout components under `@/components/ui/images/`. All three use Next.js `<Image>` for automatic optimisation (lazy loading, WebP conversion, and responsive sizing).
+
+## Responsive image
+
+The `ResponsiveImage` component renders a single full-width image inside a rounded container.
+
+```tsx
+import ResponsiveImage from "@/components/ui/images/ResponsiveImage";
+
+<ResponsiveImage />
+```
+
+### Source
+
+```tsx
+import Image from "next/image";
+
+export default function ResponsiveImage() {
+  return (
+    <div className="relative">
+      <div className="overflow-hidden">
+        <Image
+          src="/images/grid-image/image-01.png"
+          alt="Cover"
+          className="w-full border border-gray-200 rounded-xl dark:border-gray-800"
+          width={1054}
+          height={600}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+The `width` and `height` props passed to `<Image>` represent the intrinsic dimensions of the source file in pixels. Next.js uses these to calculate the aspect ratio for layout shift prevention. The `w-full` Tailwind class makes the rendered image fill its container at any viewport width.
+
+---
+
+## Two-column image grid
+
+The `TwoColumnImageGrid` component places two images side by side using a responsive CSS grid that stacks to a single column on mobile.
+
+```tsx
+import TwoColumnImageGrid from "@/components/ui/images/TwoColumnImageGrid";
+
+<TwoColumnImageGrid />
+```
+
+### Source
+
+```tsx
+import Image from "next/image";
+
+export default function TwoColumnImageGrid() {
+  return (
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      <div>
+        <Image
+          src="/images/grid-image/image-02.png"
+          alt="grid"
+          className="w-full border border-gray-200 rounded-xl dark:border-gray-800"
+          width={517}
+          height={295}
+        />
+      </div>
+      <div>
+        <Image
+          src="/images/grid-image/image-03.png"
+          alt="grid"
+          className="w-full border border-gray-200 rounded-xl dark:border-gray-800"
+          width={517}
+          height={295}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+The grid is `grid-cols-1` below the `sm` breakpoint and switches to `grid-cols-2` at `640px` and above.
+
+---
+
+## Three-column image grid
+
+The `ThreeColumnImageGrid` component places up to three images in a row, stacking to two columns on medium screens and a single column on mobile.
+
+```tsx
+import ThreeColumnImageGrid from "@/components/ui/images/ThreeColumnImageGrid";
+
+<ThreeColumnImageGrid />
+```
+
+### Source
+
+```tsx
+import Image from "next/image";
+
+export default function ThreeColumnImageGrid() {
+  return (
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      <div>
+        <Image
+          src="/images/grid-image/image-04.png"
+          alt="grid"
+          className="w-full border border-gray-200 rounded-xl dark:border-gray-800"
+          width={338}
+          height={192}
+        />
+      </div>
+      <div>
+        <Image
+          src="/images/grid-image/image-05.png"
+          alt="grid"
+          className="w-full border border-gray-200 rounded-xl dark:border-gray-800"
+          width={338}
+          height={192}
+        />
+      </div>
+      <div>
+        <Image
+          src="/images/grid-image/image-06.png"
+          alt="grid"
+          className="w-full border border-gray-200 rounded-xl dark:border-gray-800"
+          width={338}
+          height={192}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+The layout is `grid-cols-1` on mobile, `grid-cols-2` from the `sm` breakpoint (`640px`), and `grid-cols-3` from the `xl` breakpoint (`1280px`).
+
+---
+
+## Using the page layout
+
+The images page (`/images`) renders all three components stacked vertically inside component cards:
+
+```tsx
+import ComponentCard from "@/components/common/ComponentCard";
+import ResponsiveImage from "@/components/ui/images/ResponsiveImage";
+import TwoColumnImageGrid from "@/components/ui/images/TwoColumnImageGrid";
+import ThreeColumnImageGrid from "@/components/ui/images/ThreeColumnImageGrid";
+
+export default function Images() {
+  return (
+    <div className="space-y-5 sm:space-y-6">
+      <ComponentCard title="Responsive image">
+        <ResponsiveImage />
+      </ComponentCard>
+      <ComponentCard title="Image in 2 Grid">
+        <TwoColumnImageGrid />
+      </ComponentCard>
+      <ComponentCard title="Image in 3 Grid">
+        <ThreeColumnImageGrid />
+      </ComponentCard>
+    </div>
+  );
+}
+```
+
+<Tip>
+  To swap in your own images, copy one of the layout components and replace the `src`, `width`, and `height` props with your own values. Make sure external image domains are added to the `images.remotePatterns` list in `next.config.js`.
+</Tip>

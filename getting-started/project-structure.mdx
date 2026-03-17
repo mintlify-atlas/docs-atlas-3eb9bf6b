@@ -1,0 +1,168 @@
+---
+title: "Project structure"
+description: "An overview of the TailAdmin directory layout and what each folder contains."
+---
+
+TailAdmin follows the **Next.js App Router** conventions. All application source code lives inside `src/`, and the root of the repository holds configuration files.
+
+## Directory tree
+
+```
+free-nextjs-admin-dashboard/
+├── public/
+│   └── images/
+├── src/
+│   ├── app/
+│   │   ├── (admin)/
+│   │   │   ├── (others-pages)/
+│   │   │   │   ├── (chart)/
+│   │   │   │   ├── (forms)/
+│   │   │   │   ├── (tables)/
+│   │   │   │   ├── blank/
+│   │   │   │   ├── calendar/
+│   │   │   │   └── profile/
+│   │   │   ├── (ui-elements)/
+│   │   │   │   ├── alerts/
+│   │   │   │   ├── avatars/
+│   │   │   │   ├── badge/
+│   │   │   │   ├── buttons/
+│   │   │   │   ├── images/
+│   │   │   │   ├── modals/
+│   │   │   │   └── videos/
+│   │   │   ├── layout.tsx
+│   │   │   └── page.tsx
+│   │   ├── (full-width-pages)/
+│   │   │   ├── (auth)/
+│   │   │   │   ├── layout.tsx
+│   │   │   │   ├── signin/
+│   │   │   │   └── signup/
+│   │   │   ├── (error-pages)/
+│   │   │   │   └── error-404/
+│   │   │   └── layout.tsx
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── not-found.tsx
+│   ├── components/
+│   │   ├── auth/
+│   │   ├── calendar/
+│   │   ├── charts/
+│   │   ├── common/
+│   │   ├── ecommerce/
+│   │   ├── form/
+│   │   ├── header/
+│   │   ├── tables/
+│   │   ├── ui/
+│   │   ├── user-profile/
+│   │   └── videos/
+│   ├── context/
+│   │   ├── SidebarContext.tsx
+│   │   └── ThemeContext.tsx
+│   ├── hooks/
+│   │   ├── useGoBack.ts
+│   │   └── useModal.ts
+│   ├── icons/
+│   │   ├── index.tsx
+│   │   └── *.svg
+│   └── layout/
+│       ├── AppHeader.tsx
+│       ├── AppSidebar.tsx
+│       ├── Backdrop.tsx
+│       └── SidebarWidget.tsx
+├── next.config.ts
+├── postcss.config.js
+├── tsconfig.json
+└── package.json
+```
+
+## Folder reference
+
+### `public/`
+
+Static assets served directly by Next.js. The `images/` subfolder holds all image files referenced by the template (logos, avatars, chart placeholders, etc.).
+
+### `src/app/`
+
+The Next.js App Router root. The root `layout.tsx` wraps the entire application with the `ThemeProvider` and `SidebarProvider` context providers and loads the `Outfit` Google Font. `globals.css` holds all Tailwind CSS v4 theme tokens and global styles.
+
+### Route groups
+
+TailAdmin uses [Next.js route groups](https://nextjs.org/docs/app/building-your-application/routing/route-groups) (folders wrapped in parentheses) to share layouts without affecting the URL structure.
+
+#### `(admin)`
+
+All standard dashboard pages. The `layout.tsx` inside this group renders the collapsible **AppSidebar**, the **AppHeader**, and the **Backdrop** overlay. Pages in `(others-pages)` and `(ui-elements)` inherit this layout automatically.
+
+| Sub-group | What it contains |
+|---|---|
+| `(others-pages)` | Charts, forms, tables, calendar, user profile, and a blank page template |
+| `(ui-elements)` | Isolated UI component demo pages — alerts, avatars, badges, buttons, images, modals, and videos |
+
+#### `(full-width-pages)`
+
+Pages that need a different shell — no sidebar or header. The group has its own `layout.tsx`.
+
+| Sub-group | What it contains |
+|---|---|
+| `(auth)` | Sign-in and sign-up pages with their own centered layout |
+| `(error-pages)` | The custom 404 error page |
+
+### `src/components/`
+
+All reusable React components, organised by domain:
+
+| Folder | Contents |
+|---|---|
+| `auth/` | Sign-in and sign-up form components |
+| `calendar/` | Full-calendar integration component |
+| `charts/` | ApexCharts wrappers (line, bar, pie, etc.) |
+| `common/` | Shared primitives such as breadcrumbs and loaders |
+| `ecommerce/` | Dashboard widgets and stat cards |
+| `form/` | Input, select, checkbox, radio, date-picker, and other form elements |
+| `header/` | Header-specific components (user menu, notifications) |
+| `tables/` | Table components with sorting and pagination |
+| `ui/` | General UI elements — alerts, avatars, badges, buttons, modals, etc. |
+| `user-profile/` | Profile page sections |
+| `videos/` | Video embed components |
+
+### `src/context/`
+
+React context providers:
+
+- **`ThemeContext.tsx`** — manages the `light` / `dark` theme state and persists the preference to `localStorage`.
+- **`SidebarContext.tsx`** — manages expanded/collapsed sidebar state and mobile-open state.
+
+Both providers are mounted at the root layout level so every page in the app can access them.
+
+### `src/hooks/`
+
+Custom React hooks:
+
+- **`useGoBack.ts`** — programmatic back-navigation helper.
+- **`useModal.ts`** — open/close toggle state for modal dialogs.
+
+### `src/icons/`
+
+SVG icon files imported as React components via `@svgr/webpack`. The `index.tsx` file re-exports every icon so you can import from a single location:
+
+```typescript
+import { BellIcon, EnvelopeIcon } from "@/icons";
+```
+
+### `src/layout/`
+
+Top-level shell components rendered by the `(admin)` group layout:
+
+- **`AppHeader.tsx`** — the sticky top navigation bar.
+- **`AppSidebar.tsx`** — the collapsible side navigation.
+- **`Backdrop.tsx`** — the semi-transparent overlay shown behind the sidebar on mobile.
+- **`SidebarWidget.tsx`** — an optional promotional or info widget rendered at the bottom of the sidebar.
+
+### Root config files
+
+| File | Purpose |
+|---|---|
+| `next.config.ts` | Next.js configuration; adds `@svgr/webpack` for SVG imports |
+| `postcss.config.js` | PostCSS config that loads the `@tailwindcss/postcss` plugin |
+| `tsconfig.json` | TypeScript config with the `@/*` path alias pointing to `src/` |
+| `package.json` | Dependencies and npm scripts |

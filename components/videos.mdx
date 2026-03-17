@@ -1,0 +1,122 @@
+---
+title: "Videos"
+description: "A YouTubeEmbed component for embedding YouTube videos at standard aspect ratios — 16:9, 4:3, 21:9, and 1:1."
+---
+
+The `YouTubeEmbed` component renders a YouTube `<iframe>` inside a responsive container that maintains a fixed aspect ratio. The component is under `@/components/ui/video/YouTubeEmbed`.
+
+```tsx
+import YouTubeEmbed from "@/components/ui/video/YouTubeEmbed";
+```
+
+## Props
+
+<ParamField path="videoId" type="string" required>
+  The YouTube video ID from the URL. For `https://www.youtube.com/watch?v=dQw4w9WgXcQ` the ID is `dQw4w9WgXcQ`.
+</ParamField>
+
+<ParamField path="aspectRatio" type='"16:9" | "4:3" | "21:9" | "1:1"' default='"16:9"'>
+  Controls the aspect ratio of the embed container using Tailwind's aspect-ratio utilities.
+
+  | Value | Tailwind class | Use case |
+  |---|---|---|
+  | `"16:9"` | `aspect-video` | Standard widescreen |
+  | `"4:3"` | `aspect-4/3` | Classic TV ratio |
+  | `"21:9"` | `aspect-21/9` | Cinematic ultrawide |
+  | `"1:1"` | `aspect-square` | Square embed |
+</ParamField>
+
+<ParamField path="title" type="string" default='"YouTube video"'>
+  Accessible title for the `<iframe>` element.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes applied to the outer container `<div>`.
+</ParamField>
+
+## Usage examples
+
+<CodeGroup>
+```tsx 16:9 (default)
+import YouTubeEmbed from "@/components/ui/video/YouTubeEmbed";
+
+<YouTubeEmbed videoId="dQw4w9WgXcQ" />
+```
+
+```tsx 4:3
+import YouTubeEmbed from "@/components/ui/video/YouTubeEmbed";
+
+<YouTubeEmbed videoId="dQw4w9WgXcQ" aspectRatio="4:3" />
+```
+
+```tsx 21:9
+import YouTubeEmbed from "@/components/ui/video/YouTubeEmbed";
+
+<YouTubeEmbed videoId="dQw4w9WgXcQ" aspectRatio="21:9" />
+```
+
+```tsx 1:1
+import YouTubeEmbed from "@/components/ui/video/YouTubeEmbed";
+
+<YouTubeEmbed videoId="dQw4w9WgXcQ" aspectRatio="1:1" />
+```
+</CodeGroup>
+
+## All aspect ratios side by side
+
+You can display all four aspect ratios in a two-column grid, which is how the built-in videos page is structured:
+
+```tsx
+import YouTubeEmbed from "@/components/ui/video/YouTubeEmbed";
+import ComponentCard from "@/components/common/ComponentCard";
+
+export default function VideosExample() {
+  return (
+    <div className="grid grid-cols-1 gap-5 sm:gap-6 xl:grid-cols-2">
+      <div className="space-y-5 sm:space-y-6">
+        <ComponentCard title="Video Ratio 16:9">
+          <YouTubeEmbed videoId="dQw4w9WgXcQ" />
+        </ComponentCard>
+        <ComponentCard title="Video Ratio 4:3">
+          <YouTubeEmbed videoId="dQw4w9WgXcQ" aspectRatio="4:3" />
+        </ComponentCard>
+      </div>
+      <div className="space-y-5 sm:space-y-6">
+        <ComponentCard title="Video Ratio 21:9">
+          <YouTubeEmbed videoId="dQw4w9WgXcQ" aspectRatio="21:9" />
+        </ComponentCard>
+        <ComponentCard title="Video Ratio 1:1">
+          <YouTubeEmbed videoId="dQw4w9WgXcQ" aspectRatio="1:1" />
+        </ComponentCard>
+      </div>
+    </div>
+  );
+}
+```
+
+## How it works
+
+Internally, the component maps the `aspectRatio` prop to a Tailwind class:
+
+```typescript
+const aspectRatioClass = {
+  "16:9": "aspect-video",
+  "4:3":  "aspect-4/3",
+  "21:9": "aspect-21/9",
+  "1:1":  "aspect-square",
+}[aspectRatio];
+```
+
+The outer `<div>` receives `overflow-hidden rounded-lg`, the chosen aspect ratio class, and any extra `className` you pass. The `<iframe>` inside is sized with `w-full h-full` so it fills the container completely.
+
+The iframe's `allow` attribute enables the standard set of YouTube permissions:
+- `accelerometer`
+- `autoplay`
+- `clipboard-write`
+- `encrypted-media`
+- `gyroscope`
+- `picture-in-picture`
+
+<Note>
+  This component is for YouTube embeds only. To embed a locally hosted video, use a standard HTML `<video>` element with Next.js `<source>` tags instead.
+</Note>

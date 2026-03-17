@@ -1,0 +1,85 @@
+---
+title: "Header"
+description: "The AppHeader component provides the sticky top navigation bar with sidebar toggle, search, theme switcher, notifications, and user menu."
+---
+
+The `AppHeader` component is a sticky, full-width header bar that integrates directly with `SidebarContext` to control the sidebar. It includes a search field, a theme toggle, a notifications dropdown, and a user account dropdown.
+
+## Structure
+
+| Section | Description |
+|---|---|
+| Sidebar toggle button | Hamburger / close icon that calls `toggleSidebar` (desktop) or `toggleMobileSidebar` (mobile) |
+| Mobile logo | Visible only below the `lg` breakpoint |
+| Application menu toggle | Three-dot button on mobile that reveals the right-side actions |
+| Search field | Desktop-only text input; focused with **⌘ K** (macOS) or **Ctrl K** (Windows/Linux) |
+| Theme toggle | Switches between light and dark mode |
+| Notifications dropdown | Bell icon with a dropdown list of recent notifications |
+| User dropdown | Avatar with user name; opens account options |
+
+## Integration with SidebarContext
+
+`AppHeader` calls `useSidebar` to get `isMobileOpen`, `toggleSidebar`, and `toggleMobileSidebar`. The toggle button decides which function to call based on the current viewport:
+
+```tsx
+const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+
+const handleToggle = () => {
+  if (window.innerWidth >= 1024) {
+    toggleSidebar();        // collapse / expand desktop rail
+  } else {
+    toggleMobileSidebar();  // open / close mobile overlay
+  }
+};
+```
+
+The toggle button icon swaps between a hamburger SVG and a cross SVG depending on `isMobileOpen`.
+
+## Keyboard shortcut
+
+The search input is registered with a global `keydown` listener:
+
+```tsx
+useEffect(() => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+      event.preventDefault();
+      inputRef.current?.focus();
+    }
+  };
+
+  document.addEventListener("keydown", handleKeyDown);
+  return () => document.removeEventListener("keydown", handleKeyDown);
+}, []);
+```
+
+The listener is cleaned up when the component unmounts.
+
+## Basic usage
+
+```tsx
+import AppHeader from "@/layout/AppHeader";
+import AppSidebar from "@/layout/AppSidebar";
+import { SidebarProvider } from "@/context/SidebarContext";
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      <AppHeader />
+      <div className="flex">
+        <AppSidebar />
+        <main className="flex-1 p-6">{children}</main>
+      </div>
+    </SidebarProvider>
+  );
+}
+```
+
+<Note>
+  `AppHeader` is a Client Component (`"use client"`). Make sure your layout wraps it inside `SidebarProvider` so that `useSidebar` has access to the context.
+</Note>
+
+## Responsive behavior
+
+- On **mobile** (< `lg`): the logo is shown in the header center, and the right-side actions (theme toggle, notifications, user menu) are hidden behind the three-dot application menu button.
+- On **desktop** (≥ `lg`): the logo is hidden from the header (it lives in the sidebar), the search bar is visible, and the right-side actions are always shown.

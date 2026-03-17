@@ -1,0 +1,119 @@
+---
+title: "Button"
+description: "A flexible button component supporting two variants, two sizes, optional leading/trailing icons, and a disabled state."
+---
+
+Import `Button` from `@/components/ui/button/Button` and pass props to control its appearance and behavior.
+
+```tsx
+import Button from "@/components/ui/button/Button";
+```
+
+## Props
+
+<ParamField path="children" type="ReactNode" required>
+  The button label or content rendered inside the button.
+</ParamField>
+
+<ParamField path="variant" type="primary | outline" default="primary">
+  Visual style of the button. **primary** renders a filled brand-colored button; **outline** renders a ring-bordered button with a white/dark background.
+</ParamField>
+
+<ParamField path="size" type="sm | md" default="md">
+  Controls padding and font size. **sm** uses `px-4 py-3 text-sm`; **md** uses `px-5 py-3.5 text-sm`.
+</ParamField>
+
+<ParamField path="startIcon" type="ReactNode">
+  An icon rendered to the **left** of the label. Wrap any SVG or icon component here.
+</ParamField>
+
+<ParamField path="endIcon" type="ReactNode">
+  An icon rendered to the **right** of the label.
+</ParamField>
+
+<ParamField path="onClick" type="() => void">
+  Click handler attached to the underlying `<button>` element.
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  When `true`, the button is non-interactive and rendered at reduced opacity (`opacity-50 cursor-not-allowed`).
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes merged onto the button element.
+</ParamField>
+
+## Variants
+
+<Tabs>
+  <Tab title="Primary">
+    ```tsx
+    // Small
+    <Button size="sm" variant="primary">
+      Button Text
+    </Button>
+
+    // Medium (default)
+    <Button size="md" variant="primary">
+      Button Text
+    </Button>
+    ```
+  </Tab>
+  <Tab title="Outline">
+    ```tsx
+    // Small
+    <Button size="sm" variant="outline">
+      Button Text
+    </Button>
+
+    // Medium (default)
+    <Button size="md" variant="outline">
+      Button Text
+    </Button>
+    ```
+  </Tab>
+</Tabs>
+
+## With icons
+
+<CodeGroup>
+```tsx Start icon
+import Button from "@/components/ui/button/Button";
+import { BoxIcon } from "@/icons";
+
+<Button size="md" variant="primary" startIcon={<BoxIcon />}>
+  Button Text
+</Button>
+
+<Button size="md" variant="outline" startIcon={<BoxIcon />}>
+  Button Text
+</Button>
+```
+
+```tsx End icon
+import Button from "@/components/ui/button/Button";
+import { BoxIcon } from "@/icons";
+
+<Button size="md" variant="primary" endIcon={<BoxIcon />}>
+  Button Text
+</Button>
+
+<Button size="md" variant="outline" endIcon={<BoxIcon />}>
+  Button Text
+</Button>
+```
+</CodeGroup>
+
+## Disabled state
+
+```tsx
+<Button variant="primary" disabled>
+  Button Text
+</Button>
+
+<Button variant="outline" disabled>
+  Button Text
+</Button>
+```
+
+When `disabled` is `true`, the `disabled` attribute is set on the native `<button>` element and `cursor-not-allowed opacity-50` classes are applied, providing both functional and visual feedback.

@@ -1,0 +1,138 @@
+---
+title: "Sign up page"
+description: "The registration page at /signup, rendered using the full-width layout with no sidebar."
+---
+
+The sign-up page lives at **`/signup`** inside the `(full-width-pages)/(auth)/signup/` route group. It renders the **`SignUpForm`** component using the same full-width layout as the sign-in page — no sidebar or application header is shown.
+
+## Route and layout
+
+| Detail | Value |
+|---|---|
+| Route | `/signup` |
+| Page file | `src/app/(full-width-pages)/(auth)/signup/page.tsx` |
+| Layout | `src/app/(full-width-pages)/layout.tsx` (no sidebar) |
+| Form component | `src/components/auth/SignUpForm.tsx` |
+
+## Page structure
+
+```tsx
+// src/app/(full-width-pages)/(auth)/signup/page.tsx
+import SignUpForm from "@/components/auth/SignUpForm";
+
+export default function SignUp() {
+  return <SignUpForm />;
+}
+```
+
+## Form fields
+
+**`SignUpForm`** collects the following fields:
+
+| Field | Type | Required |
+|---|---|---|
+| First Name | `text` | Yes |
+| Last Name | `text` | Yes |
+| Email | `email` | Yes |
+| Password | `password` (toggleable) | Yes |
+| Terms & Privacy checkbox | `checkbox` | Yes |
+
+## Form component
+
+**`SignUpForm`** is a client component (`"use client"`) that renders:
+
+- A **back to dashboard** link pointing to `/`
+- Two **social sign-up buttons** — Google and X (Twitter)
+- A **registration form** with first name, last name, email, and password fields
+- A show/hide password toggle on the password field
+- A **terms and privacy policy checkbox**
+- A **Sign Up** submit button
+- A link back to the sign-in page (`/signin`)
+
+```tsx
+// src/components/auth/SignUpForm.tsx (structure)
+export default function SignUpForm() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
+
+  return (
+    <div className="flex flex-col flex-1 lg:w-1/2 w-full overflow-y-auto no-scrollbar">
+      {/* Back link */}
+      <Link href="/">Back to dashboard</Link>
+
+      {/* Social buttons */}
+      <button>Sign up with Google</button>
+      <button>Sign up with X</button>
+
+      {/* Registration form */}
+      <form>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <Input type="text" id="fname" name="fname" placeholder="Enter your first name" />
+          <Input type="text" id="lname" name="lname" placeholder="Enter your last name" />
+        </div>
+
+        <Input type="email" id="email" name="email" placeholder="Enter your email" />
+        <Input type={showPassword ? "text" : "password"} placeholder="Enter your password" />
+
+        <Checkbox checked={isChecked} onChange={setIsChecked} />
+        {/* Terms and Privacy Policy text */}
+
+        <button type="submit">Sign Up</button>
+      </form>
+
+      <Link href="/signin">Sign In</Link>
+    </div>
+  );
+}
+```
+
+## Connecting to your registration API
+
+<Steps>
+  <Step title="Add form state">
+    Lift first name, last name, email, and password into state variables (or use `react-hook-form`):
+
+    ```tsx
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName]   = useState("");
+    const [email, setEmail]         = useState("");
+    const [password, setPassword]   = useState("");
+    ```
+  </Step>
+  <Step title="Handle form submission">
+    Add an `onSubmit` handler that calls your registration endpoint:
+
+    ```tsx
+    async function handleSubmit(e: React.FormEvent) {
+      e.preventDefault();
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ firstName, lastName, email, password }),
+      });
+      if (res.ok) {
+        router.push("/signin");
+      }
+    }
+    ```
+  </Step>
+  <Step title="Connect social sign-up">
+    Wire the Google and X buttons to `signIn` from `next-auth/react`:
+
+    ```tsx
+    import { signIn } from "next-auth/react";
+
+    <button onClick={() => signIn("google", { callbackUrl: "/" })}>
+      Sign up with Google
+    </button>
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  The **Terms and Conditions** checkbox is rendered but not validated in the template. Ensure you check `isChecked` before allowing form submission in your production implementation.
+</Note>
+
+<Info>
+  The first and last name inputs are placed in a responsive two-column grid (`sm:grid-cols-2`) that stacks to a single column on small screens.
+</Info>

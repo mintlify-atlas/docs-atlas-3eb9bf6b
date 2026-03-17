@@ -1,0 +1,139 @@
+---
+title: "Sidebar"
+description: "The AppSidebar component provides a collapsible, responsive navigation panel with support for nested submenus, hover expansion, and mobile overlay mode."
+---
+
+The `AppSidebar` component is the primary navigation structure in TailAdmin. It reads state from `SidebarContext` to control its expanded, collapsed, hovered, and mobile-open states, and renders two groups of navigation items — **Menu** and **Others**.
+
+## SidebarContext and the `useSidebar` hook
+
+All sidebar state is managed through `SidebarContext`. Wrap your application (or layout) with `SidebarProvider` and then consume state anywhere using the `useSidebar` hook.
+
+```tsx
+import { SidebarProvider } from "@/context/SidebarContext";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      {children}
+    </SidebarProvider>
+  );
+}
+```
+
+### Context shape
+
+<ParamField path="isExpanded" type="boolean">
+  Whether the sidebar is fully expanded on desktop. Defaults to `true`. Set to `false` when the user collapses the sidebar, shrinking it to an icon-only rail (90 px wide).
+</ParamField>
+
+<ParamField path="isMobileOpen" type="boolean">
+  Whether the mobile overlay drawer is open. Controlled by `toggleMobileSidebar`.
+</ParamField>
+
+<ParamField path="isHovered" type="boolean">
+  `true` while the user hovers over the collapsed icon rail on desktop, temporarily expanding the sidebar to full width without changing `isExpanded`.
+</ParamField>
+
+<ParamField path="activeItem" type="string | null">
+  The currently active navigation item label.
+</ParamField>
+
+<ParamField path="openSubmenu" type="string | null">
+  The label of the currently open submenu group, or `null` if none is open.
+</ParamField>
+
+<ParamField path="toggleSidebar" type="() => void">
+  Toggles `isExpanded` on desktop. Called when the header hamburger button is clicked on screens ≥ 1024 px.
+</ParamField>
+
+<ParamField path="toggleMobileSidebar" type="() => void">
+  Toggles `isMobileOpen` for the mobile overlay drawer. Called when the header hamburger button is clicked on screens < 1024 px.
+</ParamField>
+
+<ParamField path="setIsHovered" type="(value: boolean) => void">
+  Sets the hover state. Called by `AppSidebar` on `onMouseEnter` / `onMouseLeave`.
+</ParamField>
+
+<ParamField path="setActiveItem" type="(item: string | null) => void">
+  Programmatically sets the active item label.
+</ParamField>
+
+<ParamField path="toggleSubmenu" type="(item: string) => void">
+  Opens or closes a named submenu group.
+</ParamField>
+
+## Collapsible behavior
+
+The sidebar has three visual states on desktop:
+
+| State | Width | Trigger |
+|---|---|---|
+| Expanded | 290 px | `isExpanded === true` |
+| Collapsed (icon rail) | 90 px | `isExpanded === false` and not hovered |
+| Hover-expanded | 290 px | `isExpanded === false` and `isHovered === true` |
+
+On mobile (< 768 px), `isExpanded` is always forced to `false`. The sidebar slides in as a full-height overlay when `isMobileOpen` is `true`, and is hidden (`-translate-x-full`) otherwise.
+
+<Note>
+  The sidebar uses `lg:translate-x-0` to keep itself visible on desktop regardless of the mobile open state. The mobile overlay is layered at `z-50`.
+</Note>
+
+## NavItem type
+
+Navigation items are defined using the `NavItem` type:
+
+```tsx
+type NavItem = {
+  name: string;
+  icon: React.ReactNode;
+  path?: string; // direct link — no submenu
+  subItems?: {
+    name: string;
+    path: string;
+    pro?: boolean;
+    new?: boolean;
+  }[];
+};
+```
+
+Items with `subItems` render as accordion toggles. Items with only `path` render as `<Link>` elements. Sub-items support optional **pro** and **new** badges that appear inline.
+
+## Basic usage
+
+```tsx
+import AppSidebar from "@/layout/AppSidebar";
+import { SidebarProvider } from "@/context/SidebarContext";
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      <div className="flex">
+        <AppSidebar />
+        <main className="flex-1">{children}</main>
+      </div>
+    </SidebarProvider>
+  );
+}
+```
+
+## Accessing sidebar state in your own components
+
+```tsx
+"use client";
+import { useSidebar } from "@/context/SidebarContext";
+
+export function MyWidget() {
+  const { isExpanded, toggleSidebar } = useSidebar();
+
+  return (
+    <button onClick={toggleSidebar}>
+      {isExpanded ? "Collapse" : "Expand"}
+    </button>
+  );
+}
+```
+
+<Tip>
+  Always call `useSidebar` inside a component that is a descendant of `SidebarProvider`. Calling it outside the provider throws: `"useSidebar must be used within a SidebarProvider"`.
+</Tip>

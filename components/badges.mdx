@@ -1,0 +1,102 @@
+---
+title: "Badge"
+description: "A small inline label component with two background variants, seven color options, two sizes, and optional leading/trailing icons."
+---
+
+Badges are used to label, categorize, or highlight a piece of content.
+
+```tsx
+import Badge from "@/components/ui/badge/Badge";
+```
+
+## Props
+
+<ParamField path="children" type="ReactNode" required>
+  The badge label content.
+</ParamField>
+
+<ParamField path="variant" type="light | solid" default="light">
+  **light** uses a tinted pastel background with a colored text. **solid** uses a fully saturated background with white text.
+</ParamField>
+
+<ParamField path="color" type="primary | success | error | warning | info | light | dark" default="primary">
+  The semantic color applied to the badge.
+</ParamField>
+
+<ParamField path="size" type="sm | md" default="md">
+  **sm** uses `text-theme-xs`; **md** uses `text-sm`.
+</ParamField>
+
+<ParamField path="startIcon" type="ReactNode">
+  Icon rendered to the left of the badge label.
+</ParamField>
+
+<ParamField path="endIcon" type="ReactNode">
+  Icon rendered to the right of the badge label.
+</ParamField>
+
+## Light variant
+
+```tsx
+<Badge variant="light" color="primary">Primary</Badge>
+<Badge variant="light" color="success">Success</Badge>
+<Badge variant="light" color="error">Error</Badge>
+<Badge variant="light" color="warning">Warning</Badge>
+<Badge variant="light" color="info">Info</Badge>
+<Badge variant="light" color="light">Light</Badge>
+<Badge variant="light" color="dark">Dark</Badge>
+```
+
+## Solid variant
+
+```tsx
+<Badge variant="solid" color="primary">Primary</Badge>
+<Badge variant="solid" color="success">Success</Badge>
+<Badge variant="solid" color="error">Error</Badge>
+<Badge variant="solid" color="warning">Warning</Badge>
+<Badge variant="solid" color="info">Info</Badge>
+<Badge variant="solid" color="light">Light</Badge>
+<Badge variant="solid" color="dark">Dark</Badge>
+```
+
+## With icons
+
+<CodeGroup>
+```tsx Start icon
+import Badge from "@/components/ui/badge/Badge";
+import { PlusIcon } from "@/icons";
+
+<Badge variant="light" color="primary" startIcon={<PlusIcon />}>
+  Primary
+</Badge>
+
+<Badge variant="solid" color="success" startIcon={<PlusIcon />}>
+  Success
+</Badge>
+```
+
+```tsx End icon
+import Badge from "@/components/ui/badge/Badge";
+import { PlusIcon } from "@/icons";
+
+<Badge variant="light" color="primary" endIcon={<PlusIcon />}>
+  Primary
+</Badge>
+
+<Badge variant="solid" color="success" endIcon={<PlusIcon />}>
+  Success
+</Badge>
+```
+</CodeGroup>
+
+## Color reference
+
+| Color | Light background | Solid background |
+|---|---|---|
+| `primary` | `bg-brand-50 text-brand-500` | `bg-brand-500 text-white` |
+| `success` | `bg-success-50 text-success-600` | `bg-success-500 text-white` |
+| `error` | `bg-error-50 text-error-600` | `bg-error-500 text-white` |
+| `warning` | `bg-warning-50 text-warning-600` | `bg-warning-500 text-white` |
+| `info` | `bg-blue-light-50 text-blue-light-500` | `bg-blue-light-500 text-white` |
+| `light` | `bg-gray-100 text-gray-700` | `bg-gray-400 text-white` |
+| `dark` | `bg-gray-500 text-white` | `bg-gray-700 text-white` |

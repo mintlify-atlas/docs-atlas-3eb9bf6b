@@ -1,0 +1,185 @@
+---
+title: "Tailwind CSS configuration"
+description: "How TailAdmin configures Tailwind CSS v4, custom design tokens, and PostCSS."
+---
+
+TailAdmin uses **Tailwind CSS v4**, which introduced a significant change to how you configure the framework: there is no `tailwind.config.js` file. All theme customisation is done in CSS using the `@theme` directive inside `globals.css`.
+
+## PostCSS setup
+
+Tailwind CSS v4 is integrated through its dedicated PostCSS plugin. The entire `postcss.config.js` is:
+
+```javascript postcss.config.js
+module.exports = {
+  plugins: {
+    '@tailwindcss/postcss': {},
+  },
+};
+```
+
+The `@tailwindcss/postcss` package handles everything that separate `tailwindcss` and `autoprefixer` plugins handled in v3. You do not need to list `autoprefixer` separately.
+
+## Importing Tailwind in CSS
+
+Rather than three separate `@tailwind` directives, v4 uses a single import at the top of `globals.css`:
+
+```css src/app/globals.css
+@import 'tailwindcss';
+```
+
+This single line pulls in all of Tailwind's base, components, and utilities layers.
+
+## Custom dark-mode variant
+
+TailAdmin opts into a **class-based dark mode** via the `@custom-variant` rule:
+
+```css src/app/globals.css
+@custom-variant dark (&:is(.dark *));
+```
+
+This tells Tailwind to apply `dark:` prefixed utilities whenever an ancestor element carries the `dark` class — which `ThemeContext.tsx` adds to `<html>` when the user activates dark mode.
+
+## Theme tokens (`@theme`)
+
+All design tokens are declared inside the `@theme` block. Tailwind v4 reads this block and generates the corresponding utility classes automatically.
+
+### Custom fonts
+
+```css src/app/globals.css
+@theme {
+  --font-*: initial;
+  --font-outfit: Outfit, sans-serif;
+}
+```
+
+The `--font-*: initial` line resets Tailwind's built-in font-family scale so only `font-outfit` is available. This token is consumed by the `font-outfit` utility class, which is applied to `<body>` in the base layer.
+
+### Custom breakpoints
+
+```css src/app/globals.css
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-2xsm: 375px;
+  --breakpoint-xsm: 425px;
+  --breakpoint-3xl: 2000px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+```
+
+The `--breakpoint-*: initial` reset removes the default Tailwind breakpoints, then the project redeclares them (at the same values as v3) and adds two extra small sizes — `2xsm` (375 px) and `xsm` (425 px) — and one extra-large size — `3xl` (2000 px).
+
+### Custom type scale
+
+TailAdmin adds a named type scale for consistent heading and body sizes:
+
+```css src/app/globals.css
+@theme {
+  --text-title-2xl: 72px;
+  --text-title-2xl--line-height: 90px;
+  --text-title-xl: 60px;
+  --text-title-xl--line-height: 72px;
+  --text-title-lg: 48px;
+  --text-title-lg--line-height: 60px;
+  --text-title-md: 36px;
+  --text-title-md--line-height: 44px;
+  --text-title-sm: 30px;
+  --text-title-sm--line-height: 38px;
+  --text-theme-xl: 20px;
+  --text-theme-xl--line-height: 30px;
+  --text-theme-sm: 14px;
+  --text-theme-sm--line-height: 20px;
+  --text-theme-xs: 12px;
+  --text-theme-xs--line-height: 18px;
+}
+```
+
+### Color palette
+
+The palette is defined with CSS custom properties inside `@theme`. Tailwind generates `text-*`, `bg-*`, `border-*`, and `ring-*` utilities for every color.
+
+**Brand colors** (the primary interactive color — a blue-indigo):
+
+```css src/app/globals.css
+--color-brand-25: #f2f7ff;
+--color-brand-50: #ecf3ff;
+--color-brand-100: #dde9ff;
+--color-brand-200: #c2d6ff;
+--color-brand-300: #9cb9ff;
+--color-brand-400: #7592ff;
+--color-brand-500: #465fff;   /* primary */
+--color-brand-600: #3641f5;
+--color-brand-700: #2a31d8;
+--color-brand-800: #252dae;
+--color-brand-900: #262e89;
+--color-brand-950: #161950;
+```
+
+Additional semantic palettes follow the same 25–950 step pattern:
+
+| Token prefix | Purpose |
+|---|---|
+| `--color-gray-*` | Neutral backgrounds, borders, and text |
+| `--color-blue-light-*` | Secondary accent (sky blue) |
+| `--color-orange-*` | Warning accents |
+| `--color-success-*` | Success / positive states |
+| `--color-error-*` | Destructive / error states |
+| `--color-warning-*` | Caution states |
+
+### Shadows and z-index
+
+The `@theme` block also defines named shadow tokens and a z-index scale:
+
+```css src/app/globals.css
+--shadow-theme-sm: 0px 1px 3px 0px rgba(16, 24, 40, 0.1),
+                   0px 1px 2px 0px rgba(16, 24, 40, 0.06);
+--shadow-theme-md: 0px 4px 8px -2px rgba(16, 24, 40, 0.1),
+                   0px 2px 4px -2px rgba(16, 24, 40, 0.06);
+--shadow-focus-ring: 0px 0px 0px 4px rgba(70, 95, 255, 0.12);
+
+--z-index-1: 1;
+--z-index-9: 9;
+--z-index-99: 99;
+--z-index-999: 999;
+--z-index-9999: 9999;
+--z-index-99999: 99999;
+--z-index-999999: 999999;
+```
+
+## The `@tailwindcss/forms` plugin
+
+TailAdmin includes the official `@tailwindcss/forms` plugin to normalise default browser form styles:
+
+```json package.json
+"@tailwindcss/forms": "^0.5.10"
+```
+
+In Tailwind CSS v4 the plugin is loaded as a PostCSS plugin — or, if you prefer, by importing it directly in CSS. TailAdmin lists it as a dependency so it is available in the build pipeline.
+
+## Custom utility classes
+
+TailAdmin defines reusable sidebar menu utility classes using the `@utility` directive (a Tailwind v4 feature):
+
+```css src/app/globals.css
+@utility menu-item {
+  @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
+}
+
+@utility menu-item-active {
+  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
+}
+
+@utility menu-item-inactive {
+  @apply text-gray-700 hover:bg-gray-100 group-hover:text-gray-700
+         dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
+}
+```
+
+These utilities can be used on any element just like any other Tailwind class.
+
+<Tip>
+  Because Tailwind v4 scans your source files for class names at build time, any new utility classes you add inside `@utility` blocks are automatically included in the output — no `safelist` configuration is needed.
+</Tip>

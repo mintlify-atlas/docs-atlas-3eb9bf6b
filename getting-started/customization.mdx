@@ -1,0 +1,181 @@
+---
+title: "Customization"
+description: "Change brand colors, fonts, and component styles to match your product."
+---
+
+TailAdmin is designed to be straightforward to restyle. Because Tailwind CSS v4 keeps all design tokens in `globals.css` and there is no separate config file to track down, most visual changes are a single line edit.
+
+## Changing brand colors
+
+The primary accent color used across buttons, active states, links, and focus rings is the `brand` palette. It is defined in `src/app/globals.css` inside the `@theme` block:
+
+```css src/app/globals.css
+@theme {
+  --color-brand-25: #f2f7ff;
+  --color-brand-50: #ecf3ff;
+  --color-brand-100: #dde9ff;
+  --color-brand-200: #c2d6ff;
+  --color-brand-300: #9cb9ff;
+  --color-brand-400: #7592ff;
+  --color-brand-500: #465fff;   /* primary — used by buttons, active nav items */
+  --color-brand-600: #3641f5;
+  --color-brand-700: #2a31d8;
+  --color-brand-800: #252dae;
+  --color-brand-900: #262e89;
+  --color-brand-950: #161950;
+}
+```
+
+To swap the accent to a different hue, replace the hex values with your own color scale. Use a tool such as [uicolors.app](https://uicolors.app) to generate a consistent 25–950 ramp from a single base color.
+
+<Tip>
+  Keep the step count and token names (`brand-25` through `brand-950`) unchanged. Every component in TailAdmin already references these names — renaming them would break the existing utility classes.
+</Tip>
+
+After editing, the dev server's hot-reload picks up the change immediately; no build step is required.
+
+## Changing semantic color palettes
+
+The template also exposes palettes for status feedback. Edit any of these in `globals.css` to match your design system:
+
+| Token prefix | Default use |
+|---|---|
+| `--color-success-*` | Positive states, success banners |
+| `--color-error-*` | Destructive actions, error messages |
+| `--color-warning-*` | Caution alerts |
+| `--color-orange-*` | Secondary warning accents |
+| `--color-gray-*` | Neutrals — backgrounds, borders, body text |
+
+## Changing the font
+
+TailAdmin loads the **Outfit** font from Google Fonts using Next.js's built-in font optimisation:
+
+```typescript src/app/layout.tsx
+import { Outfit } from 'next/font/google';
+
+const outfit = Outfit({
+  subsets: ["latin"],
+});
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body className={`${outfit.className} dark:bg-gray-900`}>
+        ...
+      </body>
+    </html>
+  );
+}
+```
+
+To switch to a different Google Font:
+
+<Steps>
+  <Step title="Import your chosen font">
+    Replace the `Outfit` import with any font available in `next/font/google`:
+
+    ```typescript src/app/layout.tsx
+    import { Inter } from 'next/font/google';
+
+    const inter = Inter({
+      subsets: ["latin"],
+    });
+    ```
+  </Step>
+
+  <Step title="Apply the class name">
+    Swap `outfit.className` for `inter.className` in the `<body>` element.
+  </Step>
+
+  <Step title="Update the CSS token">
+    In `globals.css`, update the `--font-outfit` token to match the new family name so Tailwind's `font-outfit` utility class still works:
+
+    ```css src/app/globals.css
+    @theme {
+      --font-*: initial;
+      --font-inter: Inter, sans-serif;
+    }
+    ```
+  </Step>
+
+  <Step title="Update usages in base styles">
+    The `body` base style applies `font-outfit` by name. Update the class in `globals.css`:
+
+    ```css src/app/globals.css
+    @layer base {
+      body {
+        @apply relative font-normal font-inter z-1 bg-gray-50;
+      }
+    }
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  Next.js font optimisation automatically self-hosts the font files and injects the `font-face` declarations, so there is no need to add a `<link>` tag to `<head>`.
+</Note>
+
+## Extending components with Tailwind utilities
+
+Every TailAdmin component is styled exclusively with Tailwind utility classes, so extending or overriding styles is straightforward — add the classes you need directly on the element.
+
+For example, to give a card a wider border radius and a custom shadow:
+
+```tsx
+<div className="rounded-2xl shadow-theme-xl bg-white dark:bg-gray-800 p-6">
+  ...
+</div>
+```
+
+## Merging classes safely with `tailwind-merge`
+
+When you build reusable components that accept a `className` prop, class conflicts can arise — for example, a default `rounded-lg` being overridden by `rounded-none` passed from the parent. TailAdmin ships with [`tailwind-merge`](https://github.com/dcastil/tailwind-merge) (`^2.6.0`) to resolve these conflicts correctly.
+
+Use `twMerge` when constructing dynamic class strings:
+
+```typescript
+import { twMerge } from "tailwind-merge";
+
+type ButtonProps = {
+  className?: string;
+  children: React.ReactNode;
+};
+
+export function Button({ className, children }: ButtonProps) {
+  return (
+    <button
+      className={twMerge(
+        "inline-flex items-center px-4 py-2 rounded-lg bg-brand-500 text-white text-theme-sm font-medium",
+        className
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+```
+
+`twMerge` deduplicates conflicting utilities — the last value for a given CSS property wins — so the caller's `className` always takes precedence over the defaults.
+
+<Warning>
+  Avoid building class names by concatenating strings (for example, `` `bg-${color}-500` ``). Tailwind's build scanner looks for complete class names in source files, so dynamically constructed strings will not be included in the generated CSS.
+</Warning>
+
+## Adjusting breakpoints
+
+Custom breakpoints are defined alongside the standard Tailwind sizes in `globals.css`:
+
+```css src/app/globals.css
+@theme {
+  --breakpoint-2xsm: 375px;
+  --breakpoint-xsm: 425px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  --breakpoint-3xl: 2000px;
+}
+```
+
+Add or adjust values here and the corresponding responsive prefixes (e.g. `2xsm:hidden`) become available immediately throughout the project.

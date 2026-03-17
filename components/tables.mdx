@@ -1,0 +1,295 @@
+---
+title: "Table"
+description: "A set of composable table primitives — Table, TableHeader, TableBody, TableRow, and TableCell — for building accessible, styled data tables."
+---
+
+TailAdmin's table system is built from five small components that map directly to native HTML table elements. Import the ones you need from `@/components/ui/table`.
+
+```tsx
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+```
+
+## Components and props
+
+### Table
+
+The root wrapper rendered as a `<table>` element with `min-w-full` applied by default.
+
+<ParamField path="children" type="ReactNode" required>
+  Table content — typically a `TableHeader` and a `TableBody`.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes applied to the `<table>` element.
+</ParamField>
+
+---
+
+### TableHeader
+
+Rendered as a `<thead>` element.
+
+<ParamField path="children" type="ReactNode" required>
+  One or more `TableRow` components containing header cells.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes applied to the `<thead>` element.
+</ParamField>
+
+---
+
+### TableBody
+
+Rendered as a `<tbody>` element.
+
+<ParamField path="children" type="ReactNode" required>
+  One or more `TableRow` components containing data cells.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes applied to the `<tbody>` element.
+</ParamField>
+
+---
+
+### TableRow
+
+Rendered as a `<tr>` element.
+
+<ParamField path="children" type="ReactNode" required>
+  One or more `TableCell` components.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes applied to the `<tr>` element.
+</ParamField>
+
+---
+
+### TableCell
+
+Rendered as either `<th>` or `<td>` depending on the `isHeader` prop.
+
+<ParamField path="children" type="ReactNode" required>
+  Cell content.
+</ParamField>
+
+<ParamField path="isHeader" type="boolean" default="false">
+  When `true`, the cell renders as a `<th>` element. Use this for all cells inside `TableHeader`.
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional Tailwind classes applied to the cell element.
+</ParamField>
+
+---
+
+## Basic example
+
+```tsx
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+
+const users = [
+  { id: 1, name: "Alice", role: "Admin", status: "Active" },
+  { id: 2, name: "Bob", role: "Editor", status: "Inactive" },
+  { id: 3, name: "Carol", role: "Viewer", status: "Active" },
+];
+
+export default function UsersTable() {
+  return (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader className="border-y border-gray-100 dark:border-gray-800">
+          <TableRow>
+            <TableCell
+              isHeader
+              className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+            >
+              Name
+            </TableCell>
+            <TableCell
+              isHeader
+              className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+            >
+              Role
+            </TableCell>
+            <TableCell
+              isHeader
+              className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+            >
+              Status
+            </TableCell>
+          </TableRow>
+        </TableHeader>
+
+        <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
+          {users.map((user) => (
+            <TableRow key={user.id}>
+              <TableCell className="py-3 text-gray-800 text-theme-sm dark:text-white/90">
+                {user.name}
+              </TableCell>
+              <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                {user.role}
+              </TableCell>
+              <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                {user.status}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+```
+
+## Table with images and badges
+
+The pattern below is based on the `RecentOrders` component shipped with TailAdmin. It shows how to combine `Table` with Next.js `Image` and `Badge` components to build a rich data row.
+
+```tsx
+import Image from "next/image";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import Badge from "@/components/ui/badge/Badge";
+
+interface Product {
+  id: number;
+  name: string;
+  variants: string;
+  category: string;
+  price: string;
+  image: string;
+  status: "Delivered" | "Pending" | "Canceled";
+}
+
+const tableData: Product[] = [
+  {
+    id: 1,
+    name: 'MacBook Pro 13"',
+    variants: "2 Variants",
+    category: "Laptop",
+    price: "$2399.00",
+    status: "Delivered",
+    image: "/images/product/product-01.jpg",
+  },
+  {
+    id: 2,
+    name: "Apple Watch Ultra",
+    variants: "1 Variant",
+    category: "Watch",
+    price: "$879.00",
+    status: "Pending",
+    image: "/images/product/product-02.jpg",
+  },
+];
+
+export default function RecentOrders() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+      <div className="max-w-full overflow-x-auto">
+        <Table>
+          <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
+            <TableRow>
+              <TableCell
+                isHeader
+                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+              >
+                Products
+              </TableCell>
+              <TableCell
+                isHeader
+                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+              >
+                Category
+              </TableCell>
+              <TableCell
+                isHeader
+                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+              >
+                Price
+              </TableCell>
+              <TableCell
+                isHeader
+                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+              >
+                Status
+              </TableCell>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
+            {tableData.map((product) => (
+              <TableRow key={product.id}>
+                <TableCell className="py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
+                      <Image
+                        width={50}
+                        height={50}
+                        src={product.image}
+                        className="h-[50px] w-[50px]"
+                        alt={product.name}
+                      />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                        {product.name}
+                      </p>
+                      <span className="text-gray-500 text-theme-xs dark:text-gray-400">
+                        {product.variants}
+                      </span>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                  {product.category}
+                </TableCell>
+                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                  {product.price}
+                </TableCell>
+                <TableCell className="py-3">
+                  <Badge
+                    size="sm"
+                    color={
+                      product.status === "Delivered"
+                        ? "success"
+                        : product.status === "Pending"
+                        ? "warning"
+                        : "error"
+                    }
+                  >
+                    {product.status}
+                  </Badge>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+```
+
+<Tip>
+  Wrap the `Table` in a `div` with `overflow-x-auto` to make the table horizontally scrollable on small viewports without breaking the layout.
+</Tip>
