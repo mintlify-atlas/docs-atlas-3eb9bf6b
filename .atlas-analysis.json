@@ -1,0 +1,110 @@
+{
+  "projectType": "frontend",
+  "projectName": "TailAdmin",
+  "projectDescription": "A free, open-source Next.js 16 and Tailwind CSS admin dashboard template providing 30+ UI components, charts, tables, forms, and authentication pages for building data-driven back-end panels.",
+  "theme": "willow",
+  "primaryColor": "#141c2b",
+  "lightColor": "#4257e2",
+  "darkColor": "#9cacec",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Getting Started",
+        "groups": [
+          {
+            "group": "Introduction",
+            "pages": ["introduction", "getting-started/installation", "getting-started/project-structure"]
+          },
+          {
+            "group": "Configuration",
+            "pages": ["getting-started/tailwind-config", "getting-started/dark-mode", "getting-started/customization"]
+          }
+        ]
+      },
+      {
+        "tab": "Components",
+        "groups": [
+          {
+            "group": "Layout",
+            "pages": ["components/sidebar", "components/header"]
+          },
+          {
+            "group": "UI Elements",
+            "pages": ["components/buttons", "components/alerts", "components/badges", "components/avatars", "components/modals", "components/dropdowns"]
+          },
+          {
+            "group": "Forms",
+            "pages": ["components/form-elements", "components/date-picker", "components/multi-select"]
+          },
+          {
+            "group": "Data Display",
+            "pages": ["components/tables", "components/charts", "components/images", "components/videos"]
+          }
+        ]
+      },
+      {
+        "tab": "Pages",
+        "groups": [
+          {
+            "group": "Dashboard",
+            "pages": ["pages/ecommerce-dashboard"]
+          },
+          {
+            "group": "Authentication",
+            "pages": ["pages/signin", "pages/signup"]
+          },
+          {
+            "group": "Other Pages",
+            "pages": ["pages/profile", "pages/calendar", "pages/blank-page", "pages/404"]
+          }
+        ]
+      },
+      {
+        "tab": "Changelog",
+        "groups": [
+          {
+            "group": "Releases",
+            "pages": ["changelog"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Next.js 16 App Router with React Server Components",
+    "Tailwind CSS v4 with dark mode support",
+    "30+ pre-built dashboard UI components",
+    "ApexCharts integration for line and bar charts",
+    "FullCalendar integration for calendar page",
+    "Responsive sidebar with collapsible navigation",
+    "Authentication pages (Sign In / Sign Up)",
+    "Ecommerce dashboard with metrics, sales charts, and order tables",
+    "Form elements including date picker, multi-select, and switches",
+    "World map (jsvectormap) for demographic data visualization",
+    "TypeScript-first codebase",
+    "MIT licensed and free to use"
+  ],
+  "publicApiSurface": [
+    "Button component (variant: primary | outline, size: sm | md)",
+    "Alert component",
+    "Badge component",
+    "Avatar component",
+    "Modal component (useModal hook)",
+    "Dropdown component",
+    "Table component",
+    "Form / Input / Label / Select / MultiSelect components",
+    "DatePicker component (flatpickr wrapper)",
+    "Switch component",
+    "EcommerceMetrics component",
+    "MonthlySalesChart component",
+    "StatisticsChart component",
+    "MonthlyTarget component",
+    "RecentOrders component",
+    "DemographicCard component (world map)",
+    "AppSidebar layout component",
+    "AppHeader layout component",
+    "SidebarContext / ThemeContext providers",
+    "useModal hook",
+    "useGoBack hook"
+  ]
+}
